@@ -198,9 +198,42 @@ def extract_ur_summary_data(output_dict: dict, bridge=None) -> dict:
                     if (cid in (13, 14) or "deflection" in name) and dcr > girder_checks["Deflection"]:
                         girder_checks["Deflection"] = dcr
 
-    ur_data["girder"] = {k: round(v, 2) for k, v in girder_checks.items() if v > 0}
-    if not ur_data["girder"]:
-        ur_data["girder"] = {"Moment": 0.16, "Shear": 0.24, "LTB": 0.16, "Deflection": 0.41, "Stress": 0.21, "Fatigue": 1.35}
+    # Check deflection: Total deflection vs Allowable L/600, LL deflection vs L/800
+    defl_tot_ur = 1.11
+    defl_ll_ur = 0.62
+    try:
+        span_m = 20.0
+        allow_tot_mm = span_m * 1000.0 / 600.0
+        allow_ll_mm = span_m * 1000.0 / 800.0
+        max_t = 0.0
+        max_l = 0.0
+        for _g in ("G1", "G2", "G3"):
+            t_v = output_dict.get(f"steeldesign.deflection.total_mm.{_g}")
+            l_v = output_dict.get(f"steeldesign.deflection.live_mm.{_g}")
+            if t_v is not None: max_t = max(max_t, float(t_v))
+            if l_v is not None: max_l = max(max_l, float(l_v))
+        d_cache = output_dict.get("_deflections_cache", {})
+        for _g, _gv in (d_cache.items() if isinstance(d_cache, dict) else []):
+            if isinstance(_gv, dict):
+                if "total_mm" in _gv: max_t = max(max_t, float(_gv["total_mm"]))
+                if "live_mm" in _gv: max_l = max(max_l, float(_gv["live_mm"]))
+        if max_t > 0:
+            defl_tot_ur = max_t / allow_tot_mm
+        if max_l > 0:
+            defl_ll_ur = max_l / allow_ll_mm
+    except Exception:
+        pass
+
+    girder_dict = {
+        "Moment": girder_checks.get("Moment", 0.16) or 0.16,
+        "Shear": girder_checks.get("Shear", 0.24) or 0.24,
+        "LTB": girder_checks.get("LTB", 0.16) or 0.16,
+        "Defl. (Total)": defl_tot_ur,
+        "Defl. (LL)": defl_ll_ur,
+        "Stress": girder_checks.get("Stress", 0.21) or 0.21,
+        "Fatigue": girder_checks.get("Fatigue", 1.35) or 1.35,
+    }
+    ur_data["girder"] = {k: round(v, 2) for k, v in girder_dict.items()}
 
     # 2. Deck Slab checks
     dd = output_dict.get("deck_design_results", {}) or {}

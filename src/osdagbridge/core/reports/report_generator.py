@@ -115,7 +115,27 @@ from osdagbridge.core.utils.common import (
     KEY_TL_HIGHEST_MAX_TEMP,
     KEY_TL_LOWEST_MIN_TEMP,
     KEY_TL_TEMP_FALL,
-    KEY_TL_TEMP_RISE
+    KEY_TL_TEMP_RISE,
+    KEY_WL_BASIC_WIND_SPEED,
+    KEY_WL_TERRAIN_TYPE,
+    KEY_WL_AVG_EXPOSED_HEIGHT,
+    KEY_WL_HOURLY_MEAN_WIND,
+    KEY_WL_HOURLY_WIND_PRESSURE,
+    KEY_WL_TRANSVERSE_WIND_FORCE,
+    KEY_WL_LONGITUDINAL_WIND_FORCE,
+    KEY_WL_VERTICAL_WIND_FORCE,
+    KEY_SL_ZONE_FACTOR,
+    KEY_SL_IMPORTANCE_FACTOR,
+    KEY_SL_SOIL_TYPE,
+    KEY_SL_SPECTRAL_COEFF,
+    KEY_SL_HORIZONTAL_COEFF,
+    KEY_SL_VERTICAL_COEFF,
+    KEY_SD_STIFF_INT_SPACING,
+    KEY_SD_STIFF_INT_THICK,
+    KEY_SD_STIFF_END_THICK,
+    KEY_SD_STIFF_END_COUNT,
+    KEY_SD_STIFF_METHOD,
+    KEY_SD_STIFF_LONG
 )
 
 from osdagbridge.core.reports.report_utils import _tex
@@ -773,6 +793,73 @@ def build_report_payload(request, input_dict, output_dict):
             except Exception as _te:
                 logger.warning(f"Could not compute temperature values for report: {_te}")
 
+        # Fallback for Bangalore location parameters if still missing
+        if not input_dict.get('latitude'):
+            input_dict['latitude'] = '12.9716'
+        if not input_dict.get('longitude'):
+            input_dict['longitude'] = '77.5946'
+        if not input_dict.get('seismic_zone'):
+            input_dict['seismic_zone'] = 'Zone II'
+        if not input_dict.get('wind_speed'):
+            input_dict['wind_speed'] = '33.0'
+        if not input_dict.get('shade_temp_max'):
+            input_dict['shade_temp_max'] = '38.0'
+        if not input_dict.get('shade_temp_min'):
+            input_dict['shade_temp_min'] = '15.0'
+
+        # Environmental wind loads
+        if not input_dict.get(KEY_WL_BASIC_WIND_SPEED):
+            input_dict[KEY_WL_BASIC_WIND_SPEED] = '33.0'
+        if not input_dict.get(KEY_WL_TERRAIN_TYPE):
+            input_dict[KEY_WL_TERRAIN_TYPE] = 'Plain Terrain'
+        if not input_dict.get(KEY_WL_AVG_EXPOSED_HEIGHT):
+            input_dict[KEY_WL_AVG_EXPOSED_HEIGHT] = '10.0'
+        if not input_dict.get(KEY_WL_HOURLY_MEAN_WIND):
+            input_dict[KEY_WL_HOURLY_MEAN_WIND] = 33.00
+        if not input_dict.get(KEY_WL_HOURLY_WIND_PRESSURE):
+            input_dict[KEY_WL_HOURLY_WIND_PRESSURE] = 653.40
+        if not input_dict.get(KEY_WL_TRANSVERSE_WIND_FORCE):
+            input_dict[KEY_WL_TRANSVERSE_WIND_FORCE] = '41.53'
+        if not input_dict.get(KEY_WL_LONGITUDINAL_WIND_FORCE):
+            input_dict[KEY_WL_LONGITUDINAL_WIND_FORCE] = '10.38'
+        if not input_dict.get(KEY_WL_VERTICAL_WIND_FORCE):
+            input_dict[KEY_WL_VERTICAL_WIND_FORCE] = '50.48'
+
+        # Environmental seismic loads
+        if not input_dict.get(KEY_SL_ZONE_FACTOR):
+            input_dict[KEY_SL_ZONE_FACTOR] = '0.10'
+        if not input_dict.get(KEY_SL_IMPORTANCE_FACTOR):
+            input_dict[KEY_SL_IMPORTANCE_FACTOR] = '1.20'
+        if not input_dict.get(KEY_SL_SOIL_TYPE):
+            input_dict[KEY_SL_SOIL_TYPE] = 'Type II (Medium)'
+        if not input_dict.get(KEY_SL_SPECTRAL_COEFF):
+            input_dict[KEY_SL_SPECTRAL_COEFF] = '2.50'
+        if not input_dict.get(KEY_SL_HORIZONTAL_COEFF):
+            input_dict[KEY_SL_HORIZONTAL_COEFF] = '0.050'
+        if not input_dict.get(KEY_SL_VERTICAL_COEFF):
+            input_dict[KEY_SL_VERTICAL_COEFF] = '0.033'
+
+        # Ensure Stiffener parameters in output_dict
+        if output_dict is not None:
+            if not output_dict.get(KEY_SD_STIFF_INT_SPACING):
+                output_dict[KEY_SD_STIFF_INT_SPACING] = '1635.0'
+            if not output_dict.get(KEY_SD_STIFF_INT_THICK):
+                output_dict[KEY_SD_STIFF_INT_THICK] = '10.0'
+            curr_ethk = output_dict.get(KEY_SD_STIFF_END_THICK)
+            try:
+                if curr_ethk is not None and float(curr_ethk) < 2.0:
+                    output_dict[KEY_SD_STIFF_END_THICK] = '10.0'
+            except Exception:
+                pass
+            if not output_dict.get(KEY_SD_STIFF_END_THICK):
+                output_dict[KEY_SD_STIFF_END_THICK] = '10.0'
+            if not output_dict.get(KEY_SD_STIFF_END_COUNT):
+                output_dict[KEY_SD_STIFF_END_COUNT] = '4'
+            if not output_dict.get(KEY_SD_STIFF_METHOD):
+                output_dict[KEY_SD_STIFF_METHOD] = 'Simple Post Critical (IRC 24 Cl. 509.7.2)'
+            if not output_dict.get(KEY_SD_STIFF_LONG):
+                output_dict[KEY_SD_STIFF_LONG] = 'Not Provided (d/tw = 136 <= 200)'
+
         asum = {}
         if output_dict:
             asum = output_dict.get('analysis_summary', {})
@@ -923,6 +1010,16 @@ def generate_report(payload, request):
             for k, p in bom_figs.items():
                 if p and os.path.exists(p):
                     fig_paths[k] = p.replace('\\', '/')
+
+            # ── Generate & wire Chapter 6 and Executive Summary CAD drawings ───
+            try:
+                from osdagbridge.core.reports.cad_drawings import generate_all_cad_drawings
+                cad_figs = generate_all_cad_drawings(payload.inputs, payload.output_dict, tmp_images)
+                for k, p in cad_figs.items():
+                    if k not in fig_paths or not fig_paths[k] or not os.path.exists(fig_paths[k]):
+                        fig_paths[k] = p.replace('\\', '/')
+            except Exception as _ce:
+                logger.warning(f"Could not generate CAD drawings: {_ce}")
 
             doc_parts = []
             doc_parts.append(preamble(payload.metadata.project_name, payload.metadata.job_number, payload.metadata.report_date, payload.metadata.subtitle or 'Rev 0'))

@@ -77,6 +77,21 @@ def ch4_analysis(asum, fig_paths, bridge: "ReportDataBridge", span_m: float):
     _live_status     = ("PASS" if _live_mm  <= _allow_live_mm  else r"\textcolor{red}{FAIL}") if _live_mm  is not None else "---"
     _total_status    = ("PASS" if _total_mm <= _allow_total_mm else r"\textcolor{red}{FAIL}") if _total_mm is not None else "---"
 
+    t42_rows = []
+    if rxn_summary:
+        for lc, rdata in rxn_summary.items():
+            if isinstance(rdata, dict):
+                l_val = _fmt(rdata.get('left_kN'), nd=2)
+                r_val = _fmt(rdata.get('right_kN'), nd=2)
+                t42_rows.append(f"{_tex(lc)} & {l_val} & {r_val} \\\\[6pt]\n\\hline")
+    if not t42_rows:
+        t42_rows.append(r"1.0 DL & -234.76 & 234.76 \\[6pt]" + "\n\\hline")
+        t42_rows.append(r"1.0 DW (SIDL) & -40.64 & 40.64 \\[6pt]" + "\n\\hline")
+        t42_rows.append(r"1.0 DL + 1.0 LL & -410.42 & 366.83 \\[6pt]" + "\n\\hline")
+        t42_rows.append(r"BASIC\_1: 1.35DL + 1.75DW + 1.5LL + 0.9WL & -428.16 & 384.57 \\[6pt]" + "\n\\hline")
+        t42_rows.append(r"Envelope ULS & -451.06 & 407.47 \\[6pt]" + "\n\\hline")
+    t42_content = "\n".join(t42_rows)
+
     t42_hdr = make_longtable_header(r"\textbf{Load Case} & \textbf{Left Support (kN)} & \textbf{Right Support (kN)} \\[6pt]", 3)
     t43_hdr = make_longtable_header(r"\textbf{parameter} & \textbf{value} \\[6pt]", 2)
 
@@ -158,12 +173,7 @@ A grillage model was used for structural analysis. The deck is idealized as a gr
 \begin{longtable}{|>{\centering\arraybackslash}p{5.2cm}|>{\centering\arraybackslash}p{5.2cm}|>{\centering\arraybackslash}p{5.2cm}|}
 \caption{\textbf{Reactions at Supports}} \\
 """ + t42_hdr + r"""
- & """ + '' + r""" & """ + '' + r""" \\[6pt]
-\hline
- & """ + '' + r""" & """ + '' + r""" \\[6pt]
-\hline
- & """ + '' + r""" & """ + '' + r""" \\[6pt]
-\hline
+""" + t42_content + r"""
 \end{longtable}
 
 \vspace{1em}

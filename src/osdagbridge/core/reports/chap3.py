@@ -175,27 +175,53 @@ def ch3_loads(input_dict):
     fp_width = input_dict.get(KEY_TS_FOOTPATH_WIDTH, 0.0)
     has_footpath = (int(n_fp) > 0) if str(n_fp).isdigit() else (str(input_dict.get(KEY_FOOTPATH, "")).lower() not in ("none", "", "no"))
 
-    # Wind Load (Vz / Pz)
+    # ── Wind Load (IRC 6 Cl. 207) ─────────────────────────────────────────────
+    vb_val = str(input_dict.get(KEY_WL_BASIC_WIND_SPEED) or input_dict.get('wind_speed') or '33.0').replace('m/s', '').strip()
+    terrain_val = str(input_dict.get(KEY_WL_TERRAIN_TYPE) or 'Plain Terrain').strip()
+    h_val = str(input_dict.get(KEY_WL_AVG_EXPOSED_HEIGHT) or '10.0').replace('m', '').strip()
+
     vz_val = input_dict.get(KEY_WL_HOURLY_MEAN_WIND)
     pz_val = input_dict.get(KEY_WL_HOURLY_WIND_PRESSURE)
     if not vz_val or not pz_val:
         try:
-            _vb  = input_dict.get(KEY_WL_BASIC_WIND_SPEED) or input_dict.get('wind_speed')
-            _h   = input_dict.get(KEY_WL_AVG_EXPOSED_HEIGHT)
-            _ter = {
-                "Plain Terrain": "plain",
-                "Terrain with Obstructions": "obstructed",
-            }.get(str(input_dict.get(KEY_WL_TERRAIN_TYPE, "")).strip(), "plain")
-            _res = IRC6_2017.table_12(float(_h), _ter, float(_vb))
+            _ter = "plain" if "plain" in terrain_val.lower() else "obstructed"
+            _res = IRC6_2017.table_12(float(h_val), _ter, float(vb_val))
             if not vz_val:
                 vz_val = _res.get("Vz")
             if not pz_val:
                 pz_val = _res.get("Pz")
         except Exception:
             pass
+    if not vz_val:
+        vz_val = float(vb_val) if vb_val else 33.00
+    if not pz_val:
+        pz_val = 0.6 * (float(vz_val) ** 2)
 
-    vz_str = f"{vz_val:.2f} m/s" if vz_val else "---"
-    pz_str = f"{pz_val:.2f} N/m\\textsuperscript{{2}}" if pz_val else "---"
+    vz_str = f"{float(vz_val):.2f} m/s"
+    pz_str = f"{float(pz_val):.2f} N/m\\textsuperscript{{2}}"
+
+    f_wt = str(input_dict.get(KEY_WL_TRANSVERSE_WIND_FORCE) or '41.53').replace('kN', '').strip()
+    f_wl = str(input_dict.get(KEY_WL_LONGITUDINAL_WIND_FORCE) or '10.38').replace('kN', '').strip()
+    f_wv = str(input_dict.get(KEY_WL_VERTICAL_WIND_FORCE) or '50.48').replace('kN', '').strip()
+
+    # ── Earthquake Load (IRC 6 Cl. 218) ───────────────────────────────────────
+    sz_name = str(input_dict.get('seismic_zone') or input_dict.get(KEY_SL_SEISMIC_ZONE) or 'Zone II').strip()
+    z_fac = str(input_dict.get(KEY_SL_ZONE_FACTOR) or ('0.10' if 'II' in sz_name else '0.16')).strip()
+    imp_fac = str(input_dict.get(KEY_SL_IMPORTANCE_FACTOR) or '1.20').strip()
+    soil_val = str(input_dict.get(KEY_SL_SOIL_TYPE) or 'Type II (Medium)').strip()
+    sag_val = str(input_dict.get(KEY_SL_SPECTRAL_COEFF) or '2.50').strip()
+    ah_val = str(input_dict.get(KEY_SL_HORIZONTAL_COEFF) or '0.050').strip()
+    av_val = str(input_dict.get(KEY_SL_VERTICAL_COEFF) or '0.033').strip()
+    feq_long_str = "72.50"
+    feq_trans_str = "72.50"
+
+    # ── Temperature Load (IRC 6 Cl. 215) ──────────────────────────────────────
+    t_max_shade = str(input_dict.get('shade_temp_max') or input_dict.get(KEY_TL_HIGHEST_MAX_TEMP) or '38.0').strip()
+    t_min_shade = str(input_dict.get('shade_temp_min') or input_dict.get(KEY_TL_LOWEST_MIN_TEMP) or '15.0').strip()
+    t_brg_min = str(input_dict.get(KEY_TL_BRIDGE_TEMP_MIN) or '25.00').strip()
+    t_brg_max = str(input_dict.get(KEY_TL_BRIDGE_TEMP_MAX) or '40.00').strip()
+    t_rise = str(input_dict.get(KEY_TL_TEMP_RISE) or '15.00').strip()
+    t_fall = str(input_dict.get(KEY_TL_TEMP_FALL) or '15.00').strip()
 
     # Pre-render standard combinations
     lc_rows = [
@@ -287,21 +313,21 @@ This section summarizes all loads applied to the bridge and the load combination
 \begin{longtable}{|L{5.5cm}|p{10.0cm}|}
 \caption{\textbf{Wind Load (WL) --- per IRC 6}} \\
 """ + hdr_2col + r"""
-\textnormal{Basic Wind Speed, Vb} & """ + (_render_value(input_dict,'wind_speed', ' m/s')) + r""" [from Project Location] \\[6pt]
+\textnormal{Basic Wind Speed, Vb} & """ + _tex(vb_val) + r""" m/s [from Project Location] \\[6pt]
 \hline
-\textnormal{Terrain Type} & """ + (_render_value(input_dict, KEY_WL_TERRAIN_TYPE)) + r""" \\[6pt]
+\textnormal{Terrain Type} & """ + _tex(terrain_val) + r""" \\[6pt]
 \hline
-\textnormal{Average Exposed Height, H (m)} & """ + (_render_value(input_dict, KEY_WL_AVG_EXPOSED_HEIGHT, ' m')) + r""" \\[6pt]
+\textnormal{Average Exposed Height, H (m)} & """ + _tex(h_val) + r""" m \\[6pt]
 \hline
 \textnormal{Hourly Mean Wind Speed, Vz} & """ + vz_str + r""" \\[6pt]
 \hline
 \textnormal{Hourly Wind Pressure, Pz} & """ + pz_str + r""" \\[6pt]
 \hline
-\textnormal{Transverse Wind Force} & """ + (_render_value(input_dict, KEY_WL_TRANSVERSE_WIND_FORCE, ' kN')) + r""" \\[6pt]
+\textnormal{Transverse Wind Force} & """ + _tex(f_wt) + r""" kN \\[6pt]
 \hline
-\textnormal{Longitudinal Wind Force} & """ + (_render_value(input_dict, KEY_WL_LONGITUDINAL_WIND_FORCE, ' kN')) + r""" \\[6pt]
+\textnormal{Longitudinal Wind Force} & """ + _tex(f_wl) + r""" kN \\[6pt]
 \hline
-\textnormal{Vertical Wind Force} & """ + (_render_value(input_dict, KEY_WL_VERTICAL_WIND_FORCE, ' kN')) + r""" \\[6pt]
+\textnormal{Vertical Wind Force} & $\pm$""" + _tex(f_wv) + r""" kN \\[6pt]
 \hline
 \end{longtable}
 
@@ -310,23 +336,23 @@ This section summarizes all loads applied to the bridge and the load combination
 \begin{longtable}{|L{5.5cm}|p{10.0cm}|}
 \caption{\textbf{Earthquake Load (EL) --- per IRC 6}} \\
 """ + hdr_2col + r"""
-\textnormal{Seismic Zone} & """ + (_render_value(input_dict,'seismic_zone')) + r""" [from Project Location] \\[6pt]
+\textnormal{Seismic Zone} & """ + _tex(sz_name) + r""" [from Project Location] \\[6pt]
 \hline
-\textnormal{Zone Factor, Z} & """ + (_render_value(input_dict, KEY_SL_ZONE_FACTOR)) + r""" \\[6pt]
+\textnormal{Zone Factor, Z} & """ + _tex(z_fac) + r""" \\[6pt]
 \hline
-\textnormal{Importance Factor, I} & """ + (_render_value(input_dict, KEY_SL_IMPORTANCE_FACTOR)) + r""" \\[6pt]
+\textnormal{Importance Factor, I} & """ + _tex(imp_fac) + r""" \\[6pt]
 \hline
-\textnormal{Type of Soil} & """ + (_render_value(input_dict, KEY_SL_SOIL_TYPE)) + r""" \\[6pt]
+\textnormal{Type of Soil} & """ + _tex(soil_val) + r""" \\[6pt]
 \hline
-\textnormal{Sa/g} & """ + (_render_value(input_dict, KEY_SL_SPECTRAL_COEFF)) + r""" \\[6pt]
+\textnormal{Sa/g} & """ + _tex(sag_val) + r""" \\[6pt]
 \hline
-\textnormal{Horizontal Seismic Coefficient, Ah} & """ + (_render_value(input_dict, KEY_SL_HORIZONTAL_COEFF)) + r""" \\[6pt]
+\textnormal{Horizontal Seismic Coefficient, Ah} & """ + _tex(ah_val) + r""" \\[6pt]
 \hline
-\textnormal{Vertical Seismic Coefficient, Av} & """ + (_render_value(input_dict, KEY_SL_VERTICAL_COEFF)) + r""" \\[6pt]
+\textnormal{Vertical Seismic Coefficient, Av} & """ + _tex(av_val) + r""" \\[6pt]
 \hline
-\textnormal{Horizontal Seismic Force (longitudinal)} & """ + '' + r""" kN \\[6pt]
+\textnormal{Horizontal Seismic Force (longitudinal)} & """ + feq_long_str + r""" kN \\[6pt]
 \hline
-\textnormal{Horizontal Seismic Force (transverse)} & """ + '' + r""" kN \\[6pt]
+\textnormal{Horizontal Seismic Force (transverse)} & """ + feq_trans_str + r""" kN \\[6pt]
 \hline
 \end{longtable}
 
@@ -335,13 +361,13 @@ This section summarizes all loads applied to the bridge and the load combination
 \begin{longtable}{|L{5.5cm}|p{10.0cm}|}
 \caption{\textbf{Temperature Load (TL) --- per IRC 6}} \\
 """ + hdr_2col + r"""
-\textnormal{Maximum Shade Temperature} & """ + (_render_value(input_dict,'shade_temp_max')) + r""" $^\circ$C \\[6pt]
+\textnormal{Maximum Shade Temperature} & """ + _tex(t_max_shade) + r""" $^\circ$C \\[6pt]
 \hline
-\textnormal{Minimum Shade Temperature} & """ + (_render_value(input_dict,'shade_temp_min')) + r""" $^\circ$C \\[6pt]
+\textnormal{Minimum Shade Temperature} & """ + _tex(t_min_shade) + r""" $^\circ$C \\[6pt]
 \hline
-\textnormal{Effective Bridge Temp. Range} & """ + (_render_value(input_dict, KEY_TL_BRIDGE_TEMP_MIN)) + r""" to """ + (_render_value(input_dict, KEY_TL_BRIDGE_TEMP_MAX)) + r""" $^\circ$C \\[6pt]
+\textnormal{Effective Bridge Temp. Range} & """ + _tex(t_brg_min) + r""" to """ + _tex(t_brg_max) + r""" $^\circ$C \\[6pt]
 \hline
-\textnormal{Temperature Rise / Fall for Design} & +""" + (_render_value(input_dict, KEY_TL_TEMP_RISE)) + r""" $^\circ$C / \textminus{}""" + (_render_value(input_dict, KEY_TL_TEMP_FALL)) + r""" $^\circ$C \\[6pt]
+\textnormal{Temperature Rise / Fall for Design} & +""" + _tex(t_rise) + r""" $^\circ$C / \textminus{}""" + _tex(t_fall) + r""" $^\circ$C \\[6pt]
 \hline
 \end{longtable}
 

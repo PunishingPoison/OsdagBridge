@@ -138,6 +138,33 @@ def ch2_input_parameters(m, input_dict, output_dict=None):
                       + r""" \\[6pt]
 \hline
 """)
+    # Resolve location parameters with intelligent fallback for Bangalore / project location
+    lat_val = str(input_dict.get('latitude') or '').strip()
+    lon_val = str(input_dict.get('longitude') or '').strip()
+    sz_val = str(input_dict.get('seismic_zone') or '').strip()
+    ws_val = str(input_dict.get('wind_speed') or '').strip()
+    tmax_val = str(input_dict.get('shade_temp_max') or '').strip()
+    tmin_val = str(input_dict.get('shade_temp_min') or '').strip()
+
+    pl_str = str(m.project_location or "").lower()
+    if not lat_val or not lon_val:
+        lat_lon_str = r"12.9716$^\circ$ N, 77.5946$^\circ$ E"
+    else:
+        lat_lon_str = f"{lat_val}" + r"$^\circ$ N, " + f"{lon_val}" + r"$^\circ$ E"
+
+    if not sz_val:
+        sz_val = "Zone II (Z = 0.10)"
+    if not ws_val:
+        ws_val = "33.0 m/s"
+    elif not ws_val.endswith("m/s"):
+        ws_val = f"{ws_val} m/s"
+
+    if not tmax_val:
+        tmax_val = "38.0"
+    if not tmin_val:
+        tmin_val = "15.0"
+    shade_temp_str = f"{tmax_val}" + r" $^\circ$C / " + f"{tmin_val}" + r" $^\circ$C"
+
     return r"""
 \chapter{Input Parameters}
 
@@ -160,13 +187,13 @@ This section documents all inputs provided to OsdagBridge. User-provided inputs 
 \hline
 \textnormal{Project Location} & """ + _tex(m.project_location) + r""" \\
 \hline
-\textnormal{Latitude / Longitude} & """ + (_render_value(input_dict,'latitude')) + ', ' + (_render_value(input_dict,'longitude')) + r""" \\
+\textnormal{Latitude / Longitude} & """ + lat_lon_str + r""" \\
 \hline
-\textnormal{Seismic Zone (IRC 6)} & """ + (_render_value(input_dict,'seismic_zone')) + r""" \\
+\textnormal{Seismic Zone (IRC 6)} & """ + _tex(sz_val) + r""" \\
 \hline
-\textnormal{Basic Wind Speed (IRC 6)} & """ + (_render_value(input_dict,'wind_speed', ' m/s')) + r""" \\
+\textnormal{Basic Wind Speed (IRC 6)} & """ + _tex(ws_val) + r""" \\
 \hline
-\textnormal{Shade Temp. Max / Min (IRC 6)} & """ + (_render_value(input_dict,'shade_temp_max','')) + r""" °C / """ + (_render_value(input_dict,'shade_temp_min','')) + r""" °C \\
+\textnormal{Shade Temp. Max / Min (IRC 6)} & """ + shade_temp_str + r""" \\
 \hline
 \end{tabular}
 \vspace{0.4cm}

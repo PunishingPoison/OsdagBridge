@@ -102,6 +102,30 @@ def executive_summary(input_dict, output_dict, fig_paths) -> str:
                 if girder_max_ur is None or dcr > girder_max_ur:
                     girder_max_ur = dcr
 
+    # Check deflection from output_dict / deflections cache
+    try:
+        span_m = float(input_dict.get(KEY_SPAN, 20.0) or 20.0)
+        allow_total_mm = span_m * 1000.0 / 600.0
+        max_tot_defl = 0.0
+        for _gkey in ("G1", "G2", "G3"):
+            tot_val = output_dict.get(f"steeldesign.deflection.total_mm.{_gkey}")
+            if tot_val is not None:
+                max_tot_defl = max(max_tot_defl, float(tot_val))
+        if max_tot_defl <= 0.0:
+            dcache = output_dict.get("_deflections_cache", {})
+            for _gkey, _gvals in (dcache.items() if isinstance(dcache, dict) else []):
+                if isinstance(_gvals, dict) and "total_mm" in _gvals:
+                    max_tot_defl = max(max_tot_defl, float(_gvals["total_mm"]))
+        if max_tot_defl > allow_total_mm:
+            defl_dcr = max_tot_defl / allow_total_mm
+            chk_name = "Total Load Deflection"
+            if chk_name not in failing:
+                failing.append(chk_name)
+            if girder_max_ur is None or defl_dcr > girder_max_ur:
+                girder_max_ur = defl_dcr
+    except Exception:
+        pass
+
     if not per_girder:
         overall_design_status = ""
     elif failing:
@@ -177,6 +201,39 @@ def executive_summary(input_dict, output_dict, fig_paths) -> str:
               r'\hline' + '\n'
               r'\end{tabular}')
 
+    cb_max = _max_member_efficiency(cb_results)
+    ed_max = _max_member_efficiency(ed_results)
+
+    if failing:
+        fail_desc = ", ".join(failing)
+        g_ur_str = f" -- Max UR = {girder_max_ur:.2f}" if girder_max_ur else ""
+        girder_outcome = rf"\textbf{{Plate Girder Design:}} \textcolor{{failRed}}{{\textbf{{FAIL}}}} ({_tex(fail_desc)}{g_ur_str})"
+    elif girder_max_ur is not None:
+        girder_outcome = rf"\textbf{{Plate Girder Design:}} \textcolor{{passGreen}}{{\textbf{{PASS}}}} (Max UR = {girder_max_ur:.2f})"
+    else:
+        girder_outcome = r"\textbf{Plate Girder Design:} \textcolor{passGreen}{\textbf{PASS}}"
+
+    if cb_max is not None and cb_max > 1.0:
+        cb_outcome = rf"\textbf{{Cross Bracing Design:}} \textcolor{{failRed}}{{\textbf{{FAIL}}}} (Max UR = {cb_max:.2f})"
+    elif cb_max is not None:
+        cb_outcome = rf"\textbf{{Cross Bracing Design:}} \textcolor{{passGreen}}{{\textbf{{PASS}}}} (Max UR = {cb_max:.2f})"
+    else:
+        cb_outcome = r"\textbf{Cross Bracing Design:} \textcolor{passGreen}{\textbf{PASS}}"
+
+    if ed_max is not None and ed_max > 1.0:
+        ed_outcome = rf"\textbf{{End Diaphragm Design:}} \textcolor{{failRed}}{{\textbf{{FAIL}}}} (Max UR = {ed_max:.2f})"
+    elif ed_max is not None:
+        ed_outcome = rf"\textbf{{End Diaphragm Design:}} \textcolor{{passGreen}}{{\textbf{{PASS}}}} (Max UR = {ed_max:.2f})"
+    else:
+        ed_outcome = r"\textbf{End Diaphragm Design:} \textcolor{passGreen}{\textbf{PASS}}"
+
+    if deck_max is not None and deck_max > 1.0:
+        deck_outcome = rf"\textbf{{Deck Slab Design:}} \textcolor{{failRed}}{{\textbf{{FAIL}}}} (Max UR = {deck_max:.2f})"
+    elif deck_max is not None:
+        deck_outcome = rf"\textbf{{Deck Slab Design:}} \textcolor{{passGreen}}{{\textbf{{PASS}}}} (Max UR = {deck_max:.2f})"
+    else:
+        deck_outcome = r"\textbf{Deck Slab Design:} \textcolor{passGreen}{\textbf{PASS}}"
+
     return r"""
 \newpage
 {\centering\Large\bfseries Executive Summary\par}
@@ -230,10 +287,12 @@ This section provides a concise summary of the bridge design, key inputs, govern
 \addcontentsline{toc}{section}{Key Design Outcomes Summary}
 \label{sec:key-outcomes}
 
-\noindent Girder design pass \\
-Cross bracing design pass \\
-End Diaphragm design pass \\
-Deck design pass
+\begin{itemize}
+\item """ + girder_outcome + r"""
+\item """ + cb_outcome + r"""
+\item """ + ed_outcome + r"""
+\item """ + deck_outcome + r"""
+\end{itemize}
 
 \section*{Design Assumptions and Limitations}
 \addcontentsline{toc}{section}{Design Assumptions and Limitations}
