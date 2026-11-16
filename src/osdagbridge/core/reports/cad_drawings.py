@@ -195,7 +195,7 @@ def draw_typical_cross_section(width=5.15, cw=4.25, depth=1.12, t_deck=0.25, n_g
         # X Diagonals
         ax.plot([g1x, g2x], [y_top_c, y_bot_c], color=COLOR_BRACING, lw=1.2, ls='--')
         ax.plot([g1x, g2x], [y_bot_c, y_top_c], color=COLOR_BRACING, lw=1.2, ls='--')
-        ax.text((g1x + g2x)/2, (y_top_c + y_bot_c)/2, "X-Bracing\n(ISA 90x90x8)", ha='center', va='center',
+        ax.text((g1x + g2x)/2, (y_top_c + y_bot_c)/2, "X-Bracing\n(ISA 40x40x3)", ha='center', va='center',
                 fontsize=6.5, color='#B7410E', bbox=dict(boxstyle='square,pad=0.2', facecolor='white', alpha=0.8, edgecolor='none'))
 
     # Dimensions & Callouts
@@ -473,7 +473,7 @@ def draw_stiffener_preview(span=20.0, depth=1.12, int_spacing=1.635, out_path=""
     # Callout for intermediate stiffener
     if stiff_xs:
         mid_sx = stiff_xs[len(stiff_xs)//2]
-        ax.annotate(f"Intermediate Stiffeners\nSpacing c = {spacing_mm:.0f} mm c/c\nThickness = 10 mm",
+        ax.annotate(f"Intermediate Stiffeners\nSpacing c = {spacing_mm:.0f} mm c/c\nThickness = 14 mm",
                     xy=(mid_sx, D_mm/2), xytext=(mid_sx + 1500, D_mm/2 + 250),
                     arrowprops=dict(arrowstyle='->', color='#B7410E', lw=1.0),
                     fontsize=7.5, fontweight='bold', color='#B7410E',
@@ -529,11 +529,11 @@ def draw_cb_diagram(spacing=1.72, depth=1.12, out_path=""):
     yb = d_mm * 0.15
 
     # Top chord
-    ax.plot([0, s_mm], [yt, yt], color=COLOR_BRACING, lw=2.5, label='Top Chord (ISA 90x90x8)')
+    ax.plot([0, s_mm], [yt, yt], color=COLOR_BRACING, lw=2.5, label='Top Chord (ISA 40x40x3)')
     # Bottom chord
-    ax.plot([0, s_mm], [yb, yb], color='#2980B9', lw=2.5, label='Bottom Chord (ISA 90x90x8)')
+    ax.plot([0, s_mm], [yb, yb], color='#2980B9', lw=2.5, label='Bottom Chord (ISA 40x40x3)')
     # Diagonals
-    ax.plot([0, s_mm], [yt, yb], color='#27AE60', lw=2.0, ls='--', label='Diagonal (ISA 90x90x8)')
+    ax.plot([0, s_mm], [yt, yb], color='#27AE60', lw=2.0, ls='--', label='Diagonal (ISA 40x40x3)')
     ax.plot([0, s_mm], [yb, yt], color='#27AE60', lw=2.0, ls='--')
 
     # Gusset plates at joints
@@ -591,10 +591,10 @@ def draw_ed_diagram(spacing=1.72, depth=1.12, out_path=""):
     yb = d_mm * 0.12
 
     # Top and bottom chords
-    ax.plot([0, s_mm], [yt, yt], color='#C0392B', lw=3.0, label='Top Chord (ISA 90x90x8)')
-    ax.plot([0, s_mm], [yb, yb], color='#C0392B', lw=3.0, label='Bottom Chord (ISA 90x90x8)')
+    ax.plot([0, s_mm], [yt, yt], color='#C0392B', lw=3.0, label='Top Chord (ISA 40x40x3)')
+    ax.plot([0, s_mm], [yb, yb], color='#C0392B', lw=3.0, label='Bottom Chord (ISA 40x40x3)')
     # Diagonals
-    ax.plot([0, s_mm], [yt, yb], color='#8E44AD', lw=2.2, ls='--', label='Diagonals (ISA 90x90x8)')
+    ax.plot([0, s_mm], [yt, yb], color='#8E44AD', lw=2.2, ls='--', label='Diagonals (ISA 40x40x3)')
     ax.plot([0, s_mm], [yb, yt], color='#8E44AD', lw=2.2, ls='--')
 
     # Dimensions

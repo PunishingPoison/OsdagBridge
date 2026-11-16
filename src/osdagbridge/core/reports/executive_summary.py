@@ -141,7 +141,11 @@ def executive_summary(input_dict, output_dict, fig_paths) -> str:
     component_urs = []                  # (ur_value, component_label)
     if girder_max_ur is not None:
         component_urs.append((girder_max_ur, "Girder"))
-    deck_max = _max_float([v for k, v in deck_results.items() if str(k).startswith("ur_")])
+    # Standalone deck slab structural design checks (flexure, overhang, punching, shear, crack width)
+    deck_structural_keys = ["ur_bot_uls", "ur_top_uls", "ur_oh_uls", "ur_bot_shear", "ur_bot_punch", "ur_bot_crack"]
+    deck_max = _max_float([deck_results.get(k) for k in deck_structural_keys if deck_results.get(k) is not None])
+    if deck_max is None:
+        deck_max = _max_float([v for k, v in deck_results.items() if str(k).startswith("ur_") and not str(k).startswith("ur_composite")])
     if deck_max is not None:
         component_urs.append((deck_max, "Deck slab"))
     for results, label in ((cb_results, "Cross bracing"), (ed_results, "End diaphragm")):

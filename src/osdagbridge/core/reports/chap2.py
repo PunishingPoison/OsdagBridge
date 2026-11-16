@@ -214,7 +214,7 @@ This section documents all inputs provided to OsdagBridge. User-provided inputs 
 \hline
 \textnormal{Include Median} & """ + (_render_value(input_dict, KEY_INCLUDE_MEDIAN)) + r""" \\
 \hline
-\textnormal{Footpath} & """ + (_render_value(input_dict, KEY_FOOTPATH)) + r""" \\
+\textnormal{Footpath} & """ + ("None (Omitted: vehicular-only highway bridge without pedestrian access per IRC 5 Cl. 104.3.6)" if str(input_dict.get(KEY_FOOTPATH, "")).strip().lower() in ("none", "no", "false", "0", "") else _render_value(input_dict, KEY_FOOTPATH)) + r""" \\
 \hline
 \textnormal{Skew Angle (degrees)} & """ + (_render_value(input_dict, KEY_SKEW_ANGLE, '°')) + r""" (IRC 24 Cl. 504.8 limit: $\pm$15°) \\
 \hline
@@ -263,7 +263,7 @@ Where the user has modified additional inputs, those values are reported here. W
 \hline
 \textnormal{Deck Thickness (mm)} & """ + (_render_value(input_dict, KEY_TS_DECK_THICKNESS, ' mm')) + r""" \\[6pt]
 \hline
-\textnormal{Footpath Width (m)} & """ + (_render_value(input_dict, KEY_TS_FOOTPATH_WIDTH, ' m')) + r""" (IRC 5 Cl. 104.3.6 min: 1.5 m) \\[6pt]
+\textnormal{Footpath Width (m)} & """ + ("0.0 m (Omitted: vehicular-only highway bridge; IRC 5 Cl. 104.3.6 minimum 1.5 m applies only when footpaths are warranted)" if (not input_dict.get(KEY_TS_FOOTPATH_WIDTH) or str(input_dict.get(KEY_TS_FOOTPATH_WIDTH)).strip() in ("0", "0.0", "0.00", "None", "") or str(input_dict.get(KEY_FOOTPATH, "")).strip().lower() in ("none", "no", "false", "0", "")) else (_render_value(input_dict, KEY_TS_FOOTPATH_WIDTH, ' m') + " (IRC 5 Cl. 104.3.6 min: 1.5 m)")) + r""" \\[6pt]
 \hline
 \textnormal{No. of Traffic Lanes} & """ + (_render_lane_count(input_dict)) + r""" (per IRC 5 Cl. 104.3.1) \\[6pt]
 \hline
