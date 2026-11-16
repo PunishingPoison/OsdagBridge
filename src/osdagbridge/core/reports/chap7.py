@@ -13,7 +13,7 @@ def ch7_quantities(input_dict, fig_paths=None):
     fig_markup = ""
     if steel_fig or rebar_fig:
         fig_markup = r"""
-\vspace{1.5em}
+\newpage
 \noindent\textbf{Material Quantity Summary Visualizations}
 
 \begin{figure}[H]
@@ -53,12 +53,13 @@ def ch7_quantities(input_dict, fig_paths=None):
 \chapter{Material Take-off \& Quantity Summary}
 \label{ch:material-takeoff}
 
-\noindent\textbf{Table 7.1  Bill of Materials (Steel, Concrete, and Reinforcement Quantities)}
+This chapter summarizes the Bill of Materials (BOM) including the quantities, total volumes, and weights of structural steel, concrete, reinforcement, and accessories.
 
-""" + NEEDSPACE_TABLE + r"""
+\vspace{0.8em}
 \begingroup
 \setlength{\tabcolsep}{3.5pt}
 \begin{longtable}{|C{1.0cm}|L{3.8cm}|C{2.6cm}|C{1.8cm}|C{1.8cm}|C{1.8cm}|C{1.8cm}|}
+\caption{\textbf{Bill of Materials (Steel, Concrete, and Reinforcement Quantities)}} \\
 """ + table_headers + r"""
 1 & Structural Steel (IS 2062) for Girders & """ + str(input_dict.get("steel_girders_vol_formula", "N.A.")) + r""" & """ + str(input_dict.get("steel_girders_qty", "N.A.")) + r""" & """ + str(input_dict.get("steel_girders_vol_total", "N.A.")) + r""" & """ + str(input_dict.get("steel_girders_wt_single", "N.A.")) + r""" & """ + str(input_dict.get("steel_girders_wt_total", "N.A.")) + r""" \\
 \hline
@@ -68,13 +69,19 @@ def ch7_quantities(input_dict, fig_paths=None):
 \hline
 2(c) & Cross Bracing - Diagonal Chord & """ + str(input_dict.get("bracing_diag_vol_formula", "N.A.")) + r""" & """ + str(input_dict.get("bracing_diag_qty", "N.A.")) + r""" & """ + str(input_dict.get("bracing_diag_vol_total", "N.A.")) + r""" & """ + str(input_dict.get("bracing_diag_wt_single", "N.A.")) + r""" & """ + str(input_dict.get("bracing_diag_wt_total", "N.A.")) + r""" \\
 \hline
-3 & Concrete (M40) for Deck Slab & """ + str(input_dict.get("concrete_deck_vol_formula", "N.A.")) + r""" & """ + str(input_dict.get("concrete_deck_qty", "N.A.")) + r""" & """ + str(input_dict.get("concrete_deck_vol_total", "N.A.")) + r""" & """ + str(input_dict.get("concrete_deck_wt_single", "N.A.")) + r""" & """ + str(input_dict.get("concrete_deck_wt_total", "N.A.")) + r""" \\
+3(a) & End Diaphragm - Top Chord & """ + str(input_dict.get("diaphragm_top_vol_formula", "N.A.")) + r""" & """ + str(input_dict.get("diaphragm_top_qty", "N.A.")) + r""" & """ + str(input_dict.get("diaphragm_top_vol_total", "N.A.")) + r""" & """ + str(input_dict.get("diaphragm_top_wt_single", "N.A.")) + r""" & """ + str(input_dict.get("diaphragm_top_wt_total", "N.A.")) + r""" \\
 \hline
-4 & Reinforcement Steel (Fe 500) & """ + str(input_dict.get("rebar_deck_vol_formula", "N.A.")) + r""" & """ + str(input_dict.get("rebar_deck_qty", "N.A.")) + r""" & """ + str(input_dict.get("rebar_deck_vol_total", "N.A.")) + r""" & """ + str(input_dict.get("rebar_deck_wt_single", "N.A.")) + r""" & """ + str(input_dict.get("rebar_deck_wt_total", "N.A.")) + r""" \\
+3(b) & End Diaphragm - Bottom Chord & """ + str(input_dict.get("diaphragm_bot_vol_formula", "N.A.")) + r""" & """ + str(input_dict.get("diaphragm_bot_qty", "N.A.")) + r""" & """ + str(input_dict.get("diaphragm_bot_vol_total", "N.A.")) + r""" & """ + str(input_dict.get("diaphragm_bot_wt_single", "N.A.")) + r""" & """ + str(input_dict.get("diaphragm_bot_wt_total", "N.A.")) + r""" \\
 \hline
-5 & Shear Stud Connectors & """ + str(input_dict.get("shear_studs_vol_formula", "N.A.")) + r""" & """ + str(input_dict.get("shear_studs_qty", "N.A.")) + r""" & """ + str(input_dict.get("shear_studs_vol_total", "N.A.")) + r""" & """ + str(input_dict.get("shear_studs_wt_single", "N.A.")) + r""" & """ + str(input_dict.get("shear_studs_wt_total", "N.A.")) + r""" \\
+3(c) & End Diaphragm - Diagonal Chord & """ + str(input_dict.get("diaphragm_diag_vol_formula", "N.A.")) + r""" & """ + str(input_dict.get("diaphragm_diag_qty", "N.A.")) + r""" & """ + str(input_dict.get("diaphragm_diag_vol_total", "N.A.")) + r""" & """ + str(input_dict.get("diaphragm_diag_wt_single", "N.A.")) + r""" & """ + str(input_dict.get("diaphragm_diag_wt_total", "N.A.")) + r""" \\
 \hline
-6 & Crash Barrier & """ + str(input_dict.get("crash_barrier_vol_formula", "N.A.")) + r""" & """ + str(input_dict.get("crash_barrier_qty", "N.A.")) + r""" & """ + str(input_dict.get("crash_barrier_vol_total", "N.A.")) + r""" & """ + str(input_dict.get("crash_barrier_wt_single", "N.A.")) + r""" & """ + str(input_dict.get("crash_barrier_wt_total", "N.A.")) + r""" \\
+4 & Concrete (M40) for Deck Slab & """ + str(input_dict.get("concrete_deck_vol_formula", "N.A.")) + r""" & """ + str(input_dict.get("concrete_deck_qty", "N.A.")) + r""" & """ + str(input_dict.get("concrete_deck_vol_total", "N.A.")) + r""" & """ + str(input_dict.get("concrete_deck_wt_single", "N.A.")) + r""" & """ + str(input_dict.get("concrete_deck_wt_total", "N.A.")) + r""" \\
+\hline
+5 & Reinforcement Steel (Fe 500) & """ + str(input_dict.get("rebar_deck_vol_formula", "N.A.")) + r""" & """ + str(input_dict.get("rebar_deck_qty", "N.A.")) + r""" & """ + str(input_dict.get("rebar_deck_vol_total", "N.A.")) + r""" & """ + str(input_dict.get("rebar_deck_wt_single", "N.A.")) + r""" & """ + str(input_dict.get("rebar_deck_wt_total", "N.A.")) + r""" \\
+\hline
+6 & Shear Stud Connectors & """ + str(input_dict.get("shear_studs_vol_formula", "N.A.")) + r""" & """ + str(input_dict.get("shear_studs_qty", "N.A.")) + r""" & """ + str(input_dict.get("shear_studs_vol_total", "N.A.")) + r""" & """ + str(input_dict.get("shear_studs_wt_single", "N.A.")) + r""" & """ + str(input_dict.get("shear_studs_wt_total", "N.A.")) + r""" \\
+\hline
+7 & Crash Barrier & """ + str(input_dict.get("crash_barrier_vol_formula", "N.A.")) + r""" & """ + str(input_dict.get("crash_barrier_qty", "N.A.")) + r""" & """ + str(input_dict.get("crash_barrier_vol_total", "N.A.")) + r""" & """ + str(input_dict.get("crash_barrier_wt_single", "N.A.")) + r""" & """ + str(input_dict.get("crash_barrier_wt_total", "N.A.")) + r""" \\
 \hline
 \end{longtable}
 \endgroup

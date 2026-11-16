@@ -73,6 +73,60 @@ from osdagbridge.core.utils.common import (
 from osdagbridge.core.reports.report_utils import _render_value, get_girder_entries, _tex
 from osdagbridge.core.reports.styles import make_longtable_header, NEEDSPACE_TABLE
 
+def _render_lane_count(input_dict):
+    val = input_dict.get(KEY_WC_LD_LANE_TABLE_COUNT)
+    if val and str(val).strip() not in ("", "None", "---"):
+        return _tex(val)
+    for k in ['loading.lane_count', 'geometry.lane_count', 'no_of_lanes']:
+        v = input_dict.get(k)
+        if v and str(v).strip() not in ("", "None", "---"):
+            return _tex(v)
+    cw = input_dict.get(KEY_CARRIAGEWAY_WIDTH) or input_dict.get('geometry.carriageway_width') or input_dict.get(KEY_TS_OVERALL_WIDTH)
+    try:
+        if cw:
+            cw_f = float(cw)
+            if cw_f < 5.3:
+                return "1"
+            elif cw_f < 9.6:
+                return "2"
+            elif cw_f < 13.1:
+                return "3"
+            else:
+                return str(max(1, int((cw_f - 3.0) / 3.5)))
+    except (ValueError, TypeError):
+        pass
+    return "1"
+
+
+def _render_dim_mm(input_dict, key, girder_idx):
+    val = input_dict.get(key)
+    if val in ("", None):
+        return ""
+    try:
+        f = float(val)
+        depth_val = input_dict.get(f"{KEY_MP_GIRDER_DEPTH}.G{girder_idx}.M1")
+        is_meters = False
+        if depth_val:
+            try:
+                d_f = float(depth_val)
+                if d_f < 20.0:
+                    is_meters = True
+            except (ValueError, TypeError):
+                pass
+        elif f < 10.0:
+            is_meters = True
+
+        if is_meters:
+            f = f * 1000.0
+
+        if abs(f - round(f)) < 1e-4:
+            return f"{int(round(f))} mm"
+        else:
+            return f"{f:.1f} mm"
+    except (ValueError, TypeError):
+        return _render_value(input_dict, key, ' mm')
+
+
 def ch2_input_parameters(m, input_dict, output_dict=None):
     girder_entries = get_girder_entries(input_dict)
     n_girders = len(girder_entries)
@@ -184,7 +238,7 @@ Where the user has modified additional inputs, those values are reported here. W
 \hline
 \textnormal{Footpath Width (m)} & """ + (_render_value(input_dict, KEY_TS_FOOTPATH_WIDTH, ' m')) + r""" (IRC 5 Cl. 104.3.6 min: 1.5 m) \\[6pt]
 \hline
-\textnormal{No. of Traffic Lanes} & """ + (_render_value(input_dict, KEY_WC_LD_LANE_TABLE_COUNT)) + r""" (per IRC 5 Cl. 104.3.1) \\[6pt]
+\textnormal{No. of Traffic Lanes} & """ + (_render_lane_count(input_dict)) + r""" (per IRC 5 Cl. 104.3.1) \\[6pt]
 \hline
 \end{longtable}
 
@@ -239,17 +293,17 @@ def _girder_tables(input_dict, n_girders):
     # Helper: one girder-dimension row
     def _dim_row(g_lbl, i):
         return (g_lbl + r""" & """
-                + (_render_value(input_dict, f"{KEY_MP_GIRDER_DEPTH}.G{i}.M1", ' mm'))
+                + (_render_dim_mm(input_dict, f"{KEY_MP_GIRDER_DEPTH}.G{i}.M1", i))
                 + r""" & """
-                + (_render_value(input_dict, f"{KEY_MP_GIRDER_WEB_THICKNESS}.G{i}.M1", ' mm'))
+                + (_render_dim_mm(input_dict, f"{KEY_MP_GIRDER_WEB_THICKNESS}.G{i}.M1", i))
                 + r""" & """
-                + (_render_value(input_dict, f"{KEY_MP_GIRDER_TOP_FLANGE_WIDTH}.G{i}.M1", ' mm'))
+                + (_render_dim_mm(input_dict, f"{KEY_MP_GIRDER_TOP_FLANGE_WIDTH}.G{i}.M1", i))
                 + ', '
-                + (_render_value(input_dict, f"{KEY_MP_GIRDER_TOP_FLANGE_THICKNESS}.G{i}.M1", ' mm'))
+                + (_render_dim_mm(input_dict, f"{KEY_MP_GIRDER_TOP_FLANGE_THICKNESS}.G{i}.M1", i))
                 + r""" & """
-                + (_render_value(input_dict, f"{KEY_MP_GIRDER_BOTTOM_FLANGE_WIDTH}.G{i}.M1", ' mm'))
+                + (_render_dim_mm(input_dict, f"{KEY_MP_GIRDER_BOTTOM_FLANGE_WIDTH}.G{i}.M1", i))
                 + ', '
-                + (_render_value(input_dict, f"{KEY_MP_GIRDER_BOTTOM_FLANGE_THICKNESS}.G{i}.M1", ' mm'))
+                + (_render_dim_mm(input_dict, f"{KEY_MP_GIRDER_BOTTOM_FLANGE_THICKNESS}.G{i}.M1", i))
                 + r""" \\[8pt]
 \hline
 """)

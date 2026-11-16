@@ -5,6 +5,7 @@
 # =============================================================================
 
 from osdagbridge.core.utils.common import (
+    KEY_CARRIAGEWAY_WIDTH,
     KEY_CB_LOAD,
     KEY_FOOTPATH,
     KEY_LL_CUSTOM_VEHICLES,
@@ -44,6 +45,7 @@ from osdagbridge.core.utils.common import (
     KEY_TL_TEMP_RISE,
     KEY_TS_FOOTPATH_WIDTH,
     KEY_TS_NO_OF_FOOTPATHS,
+    KEY_TS_OVERALL_WIDTH,
     KEY_WC_LD_LANE_TABLE_COUNT,
     KEY_WC_MATERIAL,
     KEY_WC_THICKNESS,
@@ -71,34 +73,74 @@ def ch3_loads(input_dict):
     im_aa = IRC6_2017.cl_208_3_impact_factor(span_m)
 
     lanes = input_dict.get(KEY_WC_LD_LANE_TABLE_COUNT)
-    braking_force_str = "---"
+    lanes_int = 1
     if lanes not in (None, ""):
         try:
             lanes_int = int(lanes)
-            braking_force_t = IRC6_2017.cl_211_2_braking_force(lanes_int)
-            braking_force_kN = braking_force_t * 9.81
-            braking_force_str = f"{braking_force_kN:.2f} kN"
         except Exception:
-            braking_force_str = "---"
+            lanes_int = 1
+    else:
+        cw = input_dict.get(KEY_CARRIAGEWAY_WIDTH) or input_dict.get('geometry.carriageway_width') or input_dict.get(KEY_TS_OVERALL_WIDTH)
+        try:
+            if cw:
+                cw_f = float(cw)
+                if cw_f < 5.3:
+                    lanes_int = 1
+                elif cw_f < 9.6:
+                    lanes_int = 2
+                else:
+                    lanes_int = max(1, int((cw_f - 3.0) / 3.5))
+        except (ValueError, TypeError):
+            lanes_int = 1
+
+    # Centrifugal force is 0.00 kN for straight bridge alignment per IRC 6 Cl. 212
+    cf_force_str = "0.00"
+
+    # Braking force values per vehicle category (IRC 6 Cl. 211.2):
+    # For 1 design lane: 20% of first vehicle train weight
+    # Class A: 0.20 * 57.0 t * 9.81 = 111.83 kN
+    # Class 70R Wheeled: 0.20 * 1000 kN = 200.00 kN
+    # Class 70R Tracked: 0.20 * 700 kN = 140.00 kN
+    # Class AA Wheeled: 0.20 * 400 kN = 80.00 kN
+    # Class AA Tracked: 0.20 * 700 kN = 140.00 kN
+    # Class 70R Bogie: 0.20 * 400 kN = 80.00 kN
+    if lanes_int == 1:
+        bk_a = "111.83"
+        bk_70rw = "200.00"
+        bk_70rt = "140.00"
+        bk_aaw = "80.00"
+        bk_aat = "140.00"
+        bk_bogie = "80.00"
+    else:
+        # Multi-lane scaling per IRC 6 Cl. 211.2
+        try:
+            bk_a = f"{IRC6_2017.cl_211_2_braking_force(lanes_int) * 9.81:.2f}"
+        except Exception:
+            bk_a = "111.83"
+        bk_70rw = f"{200.0 * min(2, lanes_int) + 50.0 * max(0, lanes_int - 2):.2f}"
+        bk_70rt = f"{140.0 * min(2, lanes_int) + 35.0 * max(0, lanes_int - 2):.2f}"
+        bk_aaw = f"{80.0 * min(2, lanes_int) + 20.0 * max(0, lanes_int - 2):.2f}"
+        bk_aat = f"{140.0 * min(2, lanes_int) + 35.0 * max(0, lanes_int - 2):.2f}"
+        bk_bogie = f"{80.0 * min(2, lanes_int) + 20.0 * max(0, lanes_int - 2):.2f}"
 
     # Build Vehicle Live Load rows based on UI selection
-    # Vehicle specifications: (key, name, total_load_kN, impact_factor, braking_considered, braking_val, eccentricity)
+    # Vehicle specifications: (key, name, total_load_kN, impact_factor, braking_considered, braking_val, eccentricity, cf_val)
     vehicle_specs = [
-        (KEY_LL_IRC_CLASS_A, "Class A", 554.0, f"{1.0 + im_a:.3f}", "Yes", braking_force_str, "1.2 m"),
-        (KEY_LL_IRC_70R_WHEELED, "Class 70R (Wheeled)", 1000.0, f"{1.0 + im_aa:.3f}", "Yes", braking_force_str, "1.2 m"),
-        (KEY_LL_IRC_70R_TRACKED, "Class 70R (Tracked)", 700.0, f"{1.0 + im_aa:.3f}", "Yes", braking_force_str, "1.2 m"),
-        (KEY_LL_IRC_AA_WHEELED, "Class AA (Wheeled)", 400.0, f"{1.0 + im_aa:.3f}", "Yes", braking_force_str, "1.2 m"),
-        (KEY_LL_IRC_AA_TRACKED, "Class AA (Tracked)", 700.0, f"{1.0 + im_aa:.3f}", "Yes", braking_force_str, "1.2 m"),
-        (KEY_LL_IRC_70R_BOGIE, "Class 70R (Bogie)", 400.0, f"{1.0 + im_aa:.3f}", "Yes", braking_force_str, "1.2 m"),
-        (KEY_LL_IRC_CLASS_SV, "Class SV", 3850.0, "1.000", "No", "---", "---"),
-        (KEY_LL_IRC_CLASS_FATIGUE, "Class Fatigue", 400.0, "1.000", "No", "---", "---"),
+        (KEY_LL_IRC_CLASS_A, "Class A", 554.0, f"{1.0 + im_a:.3f}", "Yes", bk_a, "1.20", cf_force_str),
+        (KEY_LL_IRC_70R_WHEELED, "Class 70R (Wheeled)", 1000.0, f"{1.0 + im_aa:.3f}", "Yes", bk_70rw, "1.20", cf_force_str),
+        (KEY_LL_IRC_70R_TRACKED, "Class 70R (Tracked)", 700.0, f"{1.0 + im_aa:.3f}", "Yes", bk_70rt, "1.20", cf_force_str),
+        (KEY_LL_IRC_AA_WHEELED, "Class AA (Wheeled)", 400.0, f"{1.0 + im_aa:.3f}", "Yes", bk_aaw, "1.20", cf_force_str),
+        (KEY_LL_IRC_AA_TRACKED, "Class AA (Tracked)", 700.0, f"{1.0 + im_aa:.3f}", "Yes", bk_aat, "1.20", cf_force_str),
+        (KEY_LL_IRC_70R_BOGIE, "Class 70R (Bogie)", 400.0, f"{1.0 + im_aa:.3f}", "Yes", bk_bogie, "1.20", cf_force_str),
+        (KEY_LL_IRC_CLASS_SV, "Class SV", 3850.0, "1.000", "No", "---", "---", cf_force_str),
+        (KEY_LL_IRC_CLASS_FATIGUE, "Class Fatigue", 400.0, "1.000", "No", "---", "---", cf_force_str),
     ]
 
     vehicle_rows = []
-    for k, name, tot_load, if_val, bk_cons, bk_val, ecc in vehicle_specs:
+    for k, name, tot_load, if_val, bk_cons, bk_val, ecc, cf_val in vehicle_specs:
         if input_dict.get(k):
             vehicle_rows.append(
-                f"{name} & {tot_load:.1f} & {if_val} & {bk_cons} & {bk_val} & {ecc} \\\\[6pt]\n\\hline"
+                f"{name} & {tot_load:.1f} & {if_val} & {bk_cons} & {bk_val} & {ecc} & {cf_val} \\\\[6pt]\n\\hline"
             )
 
     custom = input_dict.get(KEY_LL_CUSTOM_VEHICLES)
@@ -106,12 +148,13 @@ def ch3_loads(input_dict):
         for c in custom:
             cname = c.get('name', 'Custom') if isinstance(c, dict) else str(c)
             cload = c.get('total_load', 500.0) if isinstance(c, dict) else 500.0
+            bk_c = f"{0.20 * float(cload):.2f}"
             vehicle_rows.append(
-                f"{_tex(cname)} & {float(cload):.1f} & 1.000 & Yes & {braking_force_str} & 1.2 m \\\\[6pt]\n\\hline"
+                f"{_tex(cname)} & {float(cload):.1f} & 1.000 & Yes & {bk_c} & 1.20 & {cf_force_str} \\\\[6pt]\n\\hline"
             )
 
     if not vehicle_rows:
-        vehicle_rows.append(r"None Specified & --- & --- & --- & --- & --- \\[6pt]\n\hline")
+        vehicle_rows.append(r"None Specified & --- & --- & --- & --- & --- & --- \\[6pt]\n\hline")
 
     vehicle_rows_tex = "\n".join(vehicle_rows)
 
@@ -177,9 +220,9 @@ def ch3_loads(input_dict):
     # Table Header Templates via styles.make_longtable_header
     hdr_2col = make_longtable_header(r"\textbf{parameter} & \textbf{value} \\", 2)
     hdr_vll = make_longtable_header(
-        r"\multirow{2}{*}{\textbf{Vehicle}} & \multirow{2}{*}{\makecell{\textbf{Total Load}\\\textbf{(kN)}}} & \multirow{2}{*}{\makecell{\textbf{Impact}\\\textbf{Factor}}} & \multicolumn{3}{c|}{\textbf{Braking Load}} \\ \cline{4-6}" + "\n"
-        + r"& & & \textbf{Considered?} & \textbf{Value} & \textbf{Eccentricity} \\",
-        6
+        r"\multirow{2}{*}{\textbf{Vehicle}} & \multirow{2}{*}{\makecell{\textbf{Total Load}\\\textbf{(kN)}}} & \multirow{2}{*}{\makecell{\textbf{Impact}\\\textbf{Factor}}} & \multicolumn{3}{c|}{\textbf{Braking Load}} & \multirow{2}{*}{\makecell{\textbf{Centrifugal}\\\textbf{Force (kN)}}} \\ \cline{4-6}" + "\n"
+        + r"& & & \textbf{Considered?} & \makecell{\textbf{Value}\\\textbf{(kN)}} & \makecell{\textbf{Eccentricity}\\\textbf{(m)}} & \\",
+        7
     )
     hdr_comb = make_longtable_header(r"\textbf{Combination ID} & \textbf{Load Cases} \\[6pt]", 2)
 
@@ -215,11 +258,12 @@ This section summarizes all loads applied to the bridge and the load combination
 \end{longtable}
 
 \newpage
-\begin{longtable}{|L{3.2cm}|C{2.0cm}|C{1.8cm}|C{2.2cm}|C{2.6cm}|C{2.2cm}|}
+\begin{longtable}{|L{2.8cm}|C{1.8cm}|C{1.6cm}|C{1.8cm}|C{2.0cm}|C{2.0cm}|C{2.4cm}|}
 \caption{\textbf{Vehicle Live Loads (LL) Parameters}} \\
 """ + hdr_vll + r"""
 """ + vehicle_rows_tex + r"""
 \end{longtable}
+\par\vspace{-0.2cm}\noindent{\footnotesize \textit{Note: Braking forces calculated per IRC 6:2017 Cl. 211.2. Centrifugal force is 0.00 kN for straight bridge alignment (IRC 6 Cl. 212).}}\vspace{0.8em}
 
 \vspace{1em}
 """ + NEEDSPACE_TABLE + r"""

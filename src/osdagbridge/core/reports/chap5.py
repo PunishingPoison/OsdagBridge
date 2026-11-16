@@ -1254,6 +1254,7 @@ This section presents all structural design checks performed by OsdagBridge. For
 \end{longtable}
 \noindent\textit{Note: IRC 22 Cl. 606.6, 606.10.}
 
+\newpage
 % ===========================
 \section{Deck Slab Design}
 \label{sec:deck-design}
@@ -1288,8 +1289,7 @@ The reinforced concrete deck slab is designed per IRC~112:2011 (flexure, shear, 
 \hline
 \end{longtable}
 
-\vspace{1em}
-""" + NEEDSPACE_TABLE + r"""
+\newpage
 \begin{longtable}{|C{3.0cm}|C{3.5cm}|C{3.0cm}|>{\centering\arraybackslash}p{4.2cm}|C{1.8cm}|}
 \caption{\textbf{Deck Slab --- Flexure Check: Interior Panel (Pigeaud's Method)}} \\
 """ + t518_hdr + r"""
@@ -1392,8 +1392,7 @@ One-Way Shear Check & $V_{Ed} \leq V_{Rd,c}$ & """ + (f"{_dkv(KEY_DD_SHEAR_VED) 
 \end{longtable}
 \noindent\textit{Note: IRC 112 Cl. 10.3.2. Shear reinforcement not provided in deck slabs; capacity relies on concrete and main reinforcement.}
 
-\vspace{1em}
-""" + NEEDSPACE_TABLE + r"""
+\newpage
 \begin{longtable}{|L{5.5cm}|>{\centering\arraybackslash}p{4.1cm}|>{\centering\arraybackslash}p{4.1cm}|C{1.8cm}|}
 \caption{\textbf{Reinforcement Detailing Summary (Deck Slab)}} \\
 """ + t523_hdr + r"""

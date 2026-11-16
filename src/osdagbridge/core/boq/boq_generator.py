@@ -11,6 +11,7 @@ from osdagbridge.core.utils.common import (
     KEY_TS_NO_OF_GIRDERS,
     KEY_TS_DECK_THICKNESS,
     KEY_TS_GIRDER_SPACING,
+    KEY_MP_GIRDER_DEPTH,
 )
 
 logger = logging.getLogger("osdagbridge.core.boq_generator")
@@ -65,6 +66,25 @@ def calculate_material_quantities(inputs: dict, outputs: dict) -> dict:
         "bracing_diag_vol_total": "N.A.",
         "bracing_diag_wt_single": "N.A.",
         "bracing_diag_wt_total": "N.A.",
+
+        "diaphragm_top_vol_formula": r"\placeholder{Area $\times$ Length}",
+        "diaphragm_top_qty": "N.A.",
+        "diaphragm_top_vol_total": "N.A.",
+        "diaphragm_top_wt_single": "N.A.",
+        "diaphragm_top_wt_total": "N.A.",
+
+        "diaphragm_bot_vol_formula": r"\placeholder{Area $\times$ Length}",
+        "diaphragm_bot_qty": "N.A.",
+        "diaphragm_bot_vol_total": "N.A.",
+        "diaphragm_bot_wt_single": "N.A.",
+        "diaphragm_bot_wt_total": "N.A.",
+
+        "diaphragm_diag_vol_formula": r"\placeholder{Area $\times$ Length}",
+        "diaphragm_diag_qty": "N.A.",
+        "diaphragm_diag_vol_total": "N.A.",
+        "diaphragm_diag_wt_single": "N.A.",
+        "diaphragm_diag_wt_total": "N.A.",
+        "diaphragm_total_wt": "0.00",
         
         "concrete_deck_vol_formula": r"\placeholder{Width $\times$ Thickness $\times$ Length}",
         "concrete_deck_qty": "N.A.",
@@ -329,6 +349,85 @@ def calculate_material_quantities(inputs: dict, outputs: dict) -> dict:
                 quantities[f"{prefix}_vol_total"] = "N.A."
                 quantities[f"{prefix}_wt_single"] = "N.A."
                 quantities[f"{prefix}_wt_total"] = "N.A."
+
+        # 5d. End Diaphragms (Cu.m) and Weight (MT)
+        # End diaphragms exist at the 2 bridge support ends
+        ed_area = 0.0
+        ed_len = 0.0
+        ed_area_val = outputs.get("transverse_member_design.ed.section_properties.bracing.G1G2.A")
+        if ed_area_val is not None:
+            try:
+                ed_area = float(ed_area_val) / 10000.0  # Convert cm² to m²
+            except Exception:
+                pass
+        if ed_area == 0.0 and bracing_area > 0.0:
+            ed_area = bracing_area
+
+        if spacing > 0.0:
+            import math
+            D_val = inputs.get(KEY_MP_GIRDER_DEPTH) or 1.12
+            try:
+                D_m = float(D_val)
+                if D_m > 50.0:
+                    D_m /= 1000.0
+            except Exception:
+                D_m = 1.12
+            h_ed = D_m * 0.85
+            ed_len = math.sqrt(spacing**2 + h_ed**2)
+
+        if ed_area > 0.0 and ed_len > 0.0 and spacing > 0.0:
+            n_ed_ends = 2  # Start and End abutments / piers
+            ed_bays = max(1, n_girders - 1)
+
+            # Top chord
+            ed_top_qty = ed_bays * n_ed_ends
+            ed_top_vol_s = ed_area * spacing
+            ed_top_vol_tot = ed_top_qty * ed_top_vol_s
+            ed_top_wt_s = ed_top_vol_s * 7.85
+            ed_top_wt_tot = ed_top_vol_tot * 7.85
+
+            quantities["diaphragm_top_vol_formula"] = f"${ed_area:.5f}\\text{{ m}}^2 \\times {spacing:.2f}\\text{{ m}} = {ed_top_vol_s:.5f}\\text{{ m}}^3$"
+            quantities["diaphragm_top_qty"] = str(ed_top_qty)
+            quantities["diaphragm_top_vol_total"] = f"{ed_top_vol_tot:.2f}"
+            quantities["diaphragm_top_wt_single"] = f"{ed_top_wt_s:.4f}"
+            quantities["diaphragm_top_wt_total"] = f"{ed_top_wt_tot:.2f}"
+
+            # Bottom chord
+            ed_bot_qty = ed_bays * n_ed_ends
+            ed_bot_vol_s = ed_area * spacing
+            ed_bot_vol_tot = ed_bot_qty * ed_bot_vol_s
+            ed_bot_wt_s = ed_bot_vol_s * 7.85
+            ed_bot_wt_tot = ed_bot_vol_tot * 7.85
+
+            quantities["diaphragm_bot_vol_formula"] = f"${ed_area:.5f}\\text{{ m}}^2 \\times {spacing:.2f}\\text{{ m}} = {ed_bot_vol_s:.5f}\\text{{ m}}^3$"
+            quantities["diaphragm_bot_qty"] = str(ed_bot_qty)
+            quantities["diaphragm_bot_vol_total"] = f"{ed_bot_vol_tot:.2f}"
+            quantities["diaphragm_bot_wt_single"] = f"{ed_bot_wt_s:.4f}"
+            quantities["diaphragm_bot_wt_total"] = f"{ed_bot_wt_tot:.2f}"
+
+            # Diagonals (X-type: 2 per bay per end)
+            ed_diag_qty = ed_bays * n_ed_ends * 2
+            ed_diag_vol_s = ed_area * ed_len
+            ed_diag_vol_tot = ed_diag_qty * ed_diag_vol_s
+            ed_diag_wt_s = ed_diag_vol_s * 7.85
+            ed_diag_wt_tot = ed_diag_vol_tot * 7.85
+
+            quantities["diaphragm_diag_vol_formula"] = f"${ed_area:.5f}\\text{{ m}}^2 \\times {ed_len:.2f}\\text{{ m}} = {ed_diag_vol_s:.5f}\\text{{ m}}^3$"
+            quantities["diaphragm_diag_qty"] = str(ed_diag_qty)
+            quantities["diaphragm_diag_vol_total"] = f"{ed_diag_vol_tot:.2f}"
+            quantities["diaphragm_diag_wt_single"] = f"{ed_diag_wt_s:.4f}"
+            quantities["diaphragm_diag_wt_total"] = f"{ed_diag_wt_tot:.2f}"
+
+            ed_total_wt = ed_top_wt_tot + ed_bot_wt_tot + ed_diag_wt_tot
+            quantities["diaphragm_total_wt"] = f"{ed_total_wt:.2f}"
+        else:
+            for prefix in ("diaphragm_top", "diaphragm_bot", "diaphragm_diag"):
+                quantities[f"{prefix}_vol_formula"] = "N.A."
+                quantities[f"{prefix}_qty"] = "N.A."
+                quantities[f"{prefix}_vol_total"] = "N.A."
+                quantities[f"{prefix}_wt_single"] = "N.A."
+                quantities[f"{prefix}_wt_total"] = "N.A."
+            quantities["diaphragm_total_wt"] = "0.00"
 
         # 6. Crash Barrier (Cu.m) and Weight (MT)
         KEY_CB_AREA = "typical_section.crash_barrier.area"
