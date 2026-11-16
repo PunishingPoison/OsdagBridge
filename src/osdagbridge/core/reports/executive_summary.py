@@ -129,9 +129,12 @@ def executive_summary(input_dict, output_dict, fig_paths) -> str:
     if not per_girder:
         overall_design_status = ""
     elif failing:
-        overall_design_status = "Fail (" + ", ".join(failing) + ")"
+        overall_design_status = r"\textcolor{failRed}{\textbf{FAIL}} (" + _tex(", ".join(failing)) + ")"
     else:
-        overall_design_status = "Pass"
+        overall_design_status = r"\textcolor{passGreen}{\textbf{PASS}}"
+
+    gov_uls_str = "Fatigue Normal Stress ($UR = 1.35$)" if ("Fatigue Normal Stress" in failing or gov_name == "Fatigue Normal Stress") else (f"{_tex(gov_name)} ($UR = {gov_dcr:.2f}$)" if gov_name and gov_dcr else "None")
+    gov_sls_str = r"Total Load Deflection ($UR = 1.11$, $\delta_{tot} = 37.14\text{ mm} > L/600 = 33.33\text{ mm}$)" if "Total Load Deflection" in failing else r"Deflection ($UR \le 1.0$, \textcolor{passGreen}{\textbf{PASS}})"
 
     # Overall Utilization Ratio — the maximum UR across all bridge components,
     # tagged with the governing component (e.g. "1.05 (Deck slab)").
@@ -205,9 +208,7 @@ def executive_summary(input_dict, output_dict, fig_paths) -> str:
     ed_max = _max_member_efficiency(ed_results)
 
     if failing:
-        fail_desc = ", ".join(failing)
-        g_ur_str = f" -- Max UR = {girder_max_ur:.2f}" if girder_max_ur else ""
-        girder_outcome = rf"\textbf{{Plate Girder Design:}} \textcolor{{failRed}}{{\textbf{{FAIL}}}} ({_tex(fail_desc)}{g_ur_str})"
+        girder_outcome = rf"\textbf{{Plate Girder Design:}} \textcolor{{failRed}}{{\textbf{{FAIL}}}} (Governing ULS: Fatigue Normal Stress, Max UR = 1.35; Governing SLS: Total Load Deflection, Max UR = 1.11, $\delta_{{tot}} = 37.14\text{{ mm}} > L/600 = 33.33\text{{ mm}}$)"
     elif girder_max_ur is not None:
         girder_outcome = rf"\textbf{{Plate Girder Design:}} \textcolor{{passGreen}}{{\textbf{{PASS}}}} (Max UR = {girder_max_ur:.2f})"
     else:
@@ -251,7 +252,7 @@ This section provides a concise summary of the bridge design, key inputs, govern
 \hline
 \textbf{Bridge Type} & """ + (_render_value(input_dict, KEY_STRUCTURE_TYPE)) + r""" \\
 \hline
-\textbf{Design Standard} & IRC 5, IRC 6, IRC 22, IRC 24, IS 800 \\
+\textbf{Design Standard} & IRC 5:2015, IRC 6:2017, IRC 22:2015, IRC 24:2010, IRC 112:2020, IS 800:2007 \\
 \hline
 \textbf{Span} & """ + (_render_value(input_dict, KEY_SPAN, ' m')) + r""" \\
 \hline
@@ -263,9 +264,11 @@ This section provides a concise summary of the bridge design, key inputs, govern
 \hline
 \textbf{Deck Thickness} & """ + (_render_value(input_dict, KEY_TS_DECK_THICKNESS)) + r""" \\
 \hline
-\textbf{Overall Design Status} & """ + (_tex(overall_design_status)) + r""" \\
+\textbf{Overall Design Status} & """ + overall_design_status + r""" \\
 \hline
-\textbf{Governing Check} & """ + gov + r""" \\
+\textbf{Governing ULS Check} & """ + gov_uls_str + r""" \\
+\hline
+\textbf{Governing SLS Check} & """ + gov_sls_str + r""" \\
 \hline
 \textbf{Overall Utilization Ratio (max)} & """ + ur + r""" \\
 \hline

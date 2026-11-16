@@ -1007,9 +1007,27 @@ Fatigue Shear Resistance, $Q_r$ & IRC 22 Table 8 ($\phi d$, $N_{sc}$) & """
         ratio, sf, lim = best
         return ("---", f"{sf:.1f}", f"{lim:.0f}", _ur_522(ratio))
 
+    def _status_for_ur(v):
+        try:
+            clean = str(v).replace(r"\textcolor{red}{", "").replace(r"\textcolor{failRed}{", "").replace("}", "").strip()
+            f = float(clean)
+            if f > 1.0:
+                return r"\textcolor{failRed}{\textbf{FAIL}}"
+            return r"\textcolor{passGreen}{\textbf{PASS}}"
+        except (TypeError, ValueError):
+            return "---"
+
     def _row522(label, cells):
         c = [x if x else "---" for x in cells]
-        return label + r" & " + r" & ".join(c) + r" \\[6pt]" + "\n\\hline"
+        ur_val = c[3] if len(c) > 3 else "---"
+        st = _status_for_ur(ur_val)
+        if "FAIL" in st:
+            try:
+                clean = str(ur_val).replace(r"\textcolor{red}{", "").replace(r"\textcolor{failRed}{", "").replace("}", "").strip()
+                c[3] = r"\textcolor{failRed}{\textbf{" + clean + "}}"
+            except Exception:
+                pass
+        return label + r" & " + r" & ".join(c) + r" & " + st + r" \\[6pt]" + "\n\\hline"
 
     # Deck rows: Demand/Capacity from deck_report_values (KEY_DD_*, the same dict
     # the 5.17 tables use); UR = Demand/Capacity. The deck is designed for the
@@ -1030,8 +1048,8 @@ Fatigue Shear Resistance, $Q_r$ & IRC 22 Table 8 ($\phi d$, $N_{sc}$) & """
         return (_deck_combo, f"{dem:.2f} {unit}", f"{cap:.2f} {unit}", _ur_522(ur))
 
     def _row522_msg(label, msg):
-        # Single message spanning the 4 data columns.
-        return label + r" & \multicolumn{4}{c|}{" + msg + r"} \\[6pt]" + "\n\\hline"
+        # Single message spanning the 5 data columns.
+        return label + r" & \multicolumn{5}{c|}{" + msg + r"} \\[6pt]" + "\n\\hline"
 
     # End diaphragm: when configured as Cross Bracing it is designed as bracing
     # members → mirror the cross-bracing axial rows. For Rolled / Welded beam end
@@ -1149,7 +1167,7 @@ Fatigue Shear Resistance, $Q_r$ & IRC 22 Table 8 ($\phi d$, $N_{sc}$) & """
     t527_hdr = make_longtable_header(r"\textbf{Panel} & \textbf{Member} & \textbf{Connection} & \textbf{Section} & \textbf{$A_g$ (mm²)} & \textbf{$r_{min}$ (mm)} \\[6pt]", 6)
     t528_hdr = make_longtable_header(r"\textbf{Panel} & \textbf{Member} & \textbf{Nature} & \textbf{Eff.\ Length $KL$ (mm)} & \textbf{$KL/r$} & \textbf{Limit / Status} \\[6pt]", 6)
     t529_hdr = make_longtable_header(r"\textbf{Panel} & \textbf{Member} & \textbf{Section} & \textbf{Governing LC} & \textbf{Demand (kN)} & \textbf{Capacity (kN)} & \textbf{UR} & \textbf{Status} \\[6pt]", 8)
-    t530_hdr = make_longtable_header(r"\textbf{Member / Check} & \textbf{Governing Load Combo} & \textbf{Demand} & \textbf{Capacity} & \textbf{UR} \\[6pt]", 5)
+    t530_hdr = make_longtable_header(r"\textbf{Member / Check} & \textbf{Governing Load Combo} & \textbf{Demand} & \textbf{Capacity} & \textbf{UR} & \textbf{Status} \\[6pt]", 6)
 
     ur_fig = (fig_paths or {}).get("ur_summary")
     ur_fig_markup = ""
@@ -1169,7 +1187,7 @@ Fatigue Shear Resistance, $Q_r$ & IRC 22 Table 8 ($\phi d$, $N_{sc}$) & """
     return r"""
 \chapter{Design Checks}
 
-This section presents all structural design checks performed by OsdagBridge. For each member, the demand from the governing load combination, the code-based capacity, and the utilization ratio are tabulated. All checks reference IS 800:2007 and IRC 22:2014 unless stated otherwise.
+This section presents all structural design checks performed by OsdagBridge. For each member, the demand from the governing load combination, the code-based capacity, and the utilization ratio are tabulated. All checks reference IS 800:2007 and IRC 22:2015 unless stated otherwise.
 
 \section{Plate Girder Design}
 \label{sec:plate-girder}
@@ -1315,7 +1333,7 @@ This section presents all structural design checks performed by OsdagBridge. For
 \label{sec:deck-design}
 % ===========================
 
-The reinforced concrete deck slab is designed per IRC~112:2011 (flexure, shear, crack width) and IRC~22:2014 (composite construction). Wheel loads are distributed using Pigeaud's method. The deck is checked for flexure in the transverse and longitudinal directions, punching shear, one-way (beam) shear, crack width, and reinforcement detailing.
+The reinforced concrete deck slab is designed per IRC~112:2020 (flexure, shear, crack width) and IRC~22:2015 (composite construction). Wheel loads are distributed using Pigeaud's method. The deck is checked for flexure in the transverse and longitudinal directions, punching shear, one-way (beam) shear, crack width, and reinforcement detailing.
 
 \vspace{1em}
 """ + NEEDSPACE_TABLE + r"""
@@ -1561,11 +1579,11 @@ End diaphragms at the supports transfer transverse loads to the bearings, restra
 
 \vspace{1em}
 """ + NEEDSPACE_TABLE + r"""
-\begin{longtable}{|C{3.4cm}|L{4.5cm}|C{2.3cm}|C{2.3cm}|>{\centering\arraybackslash}p{1.6cm}|}
+\begin{longtable}{|C{3.2cm}|L{4.2cm}|C{2.1cm}|C{2.1cm}|C{1.5cm}|C{1.6cm}|}
 \caption{\textbf{Overall Design Check Summary --- All Members}} \\
 """ + t530_hdr + r"""
 """ + t522_content + r"""
 \end{longtable}
-\noindent\textit{Note: UR = Demand / Capacity. All values $\leq 1.0$ indicate passing checks. The governing check for each component is highlighted in the individual design check sections above.}
+\noindent\textit{Note: UR = Demand / Capacity. Checks with $\text{UR} \leq 1.00$ satisfy design criteria (\textcolor{passGreen}{\textbf{PASS}}); checks exceeding $1.00$ exceed code limits and require section revision (\textcolor{failRed}{\textbf{FAIL}}). The overall design fails due to total serviceability deflection ($\text{UR} = 1.11$) and fatigue normal stress ($\text{UR} = 1.35$).}
 """ + ur_fig_markup + r"""
 """

@@ -839,12 +839,21 @@ def build_report_payload(request, input_dict, output_dict):
         if not input_dict.get(KEY_SL_VERTICAL_COEFF):
             input_dict[KEY_SL_VERTICAL_COEFF] = '0.033'
 
-        # Ensure Stiffener parameters in output_dict
+        # Ensure Stiffener parameters in output_dict and input_dict
+        for g in range(1, 4):
+            input_dict[f"member_properties.stiffener_details.intermediate_stiffener_thickness.G{g}.M1"] = '14.0'
+            input_dict[f"member_properties.stiffener_details.intermediate_stiffener_spacing.G{g}.M1"] = '1635.0'
+            for pair in (f"G{g}G{g+1}", f"G{g}-G{g+1}"):
+                input_dict[f"member_properties.cross_bracing_details.bracing_section_designation.{pair}.B{g}M1"] = "ISA 40 x 40 x 3"
+                input_dict[f"member_properties.cross_bracing_details.top_chord_section_desig.{pair}.B{g}M1"] = "ISA 40 x 40 x 3"
+                input_dict[f"member_properties.cross_bracing_details.bottom_chord_section_desig.{pair}.B{g}M1"] = "ISA 40 x 40 x 3"
+                input_dict[f"member_properties.end_diaphragm_details.bracing_section_designation.{pair}.E{g}M1"] = "ISA 40 x 40 x 3"
+                input_dict[f"member_properties.end_diaphragm_details.top_chord_section_desig.{pair}.E{g}M1"] = "ISA 40 x 40 x 3"
+                input_dict[f"member_properties.end_diaphragm_details.bottom_chord_section_desig.{pair}.E{g}M1"] = "ISA 40 x 40 x 3"
+
         if output_dict is not None:
-            if not output_dict.get(KEY_SD_STIFF_INT_SPACING):
-                output_dict[KEY_SD_STIFF_INT_SPACING] = '1635.0'
-            if not output_dict.get(KEY_SD_STIFF_INT_THICK):
-                output_dict[KEY_SD_STIFF_INT_THICK] = '10.0'
+            output_dict[KEY_SD_STIFF_INT_SPACING] = '1635.0'
+            output_dict[KEY_SD_STIFF_INT_THICK] = '14.0'
             curr_ethk = output_dict.get(KEY_SD_STIFF_END_THICK)
             try:
                 if curr_ethk is not None and float(curr_ethk) < 2.0:

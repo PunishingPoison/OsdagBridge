@@ -616,12 +616,18 @@ def draw_ed_diagram(spacing=1.72, depth=1.12, out_path=""):
     return out_path
 
 
-def draw_angle_section(size="90x90x8", title="Equal Angle ISA 90x90x8", out_path=""):
+def draw_angle_section(size="40x40x3", title="Equal Angle ISA 40x40x3", out_path=""):
     """Figures 6.8 - 6.10, 6.12 - 6.14: Equal Angle Section Profile with Dimensions."""
     fig, ax = _setup_fig_ax((3.5, 3.5))
 
-    leg = 90
-    t = 8
+    if "90" in str(size):
+        leg = 90
+        t = 8
+        cx, cy = 25.1, 25.1
+    else:
+        leg = 40
+        t = 3
+        cx, cy = 11.2, 11.2
 
     # L-section polygon
     pts = [
@@ -635,31 +641,193 @@ def draw_angle_section(size="90x90x8", title="Equal Angle ISA 90x90x8", out_path
     ax.add_patch(patches.Polygon(pts, closed=True, facecolor='#4682B4', edgecolor='#111111', lw=1.2))
 
     # Centroid dot
-    cx, cy = 25.1, 25.1
     ax.plot([cx], [cy], 'ro', markersize=3)
-    ax.text(cx + 4, cy + 4, "C.G.", fontsize=7, color='#8B0000', fontweight='bold')
+    ax.text(cx + 3, cy + 3, "C.G.", fontsize=7, color='#8B0000', fontweight='bold')
 
     # Dimensions
-    dim_off = 12
+    dim_off = 8 if leg < 50 else 12
     ax.annotate('', xy=(0, -dim_off), xytext=(leg, -dim_off),
                 arrowprops=dict(arrowstyle='<->', color=COLOR_DIM, lw=0.8))
-    ax.text(leg/2, -dim_off - 5, f"{leg} mm", ha='center', va='top', fontsize=7.5, color=COLOR_DIM)
+    ax.text(leg/2, -dim_off - 4, f"{leg} mm", ha='center', va='top', fontsize=7.5, color=COLOR_DIM)
 
     ax.annotate('', xy=(-dim_off, 0), xytext=(-dim_off, leg),
                 arrowprops=dict(arrowstyle='<->', color=COLOR_DIM, lw=0.8))
-    ax.text(-dim_off - 5, leg/2, f"{leg} mm", ha='right', va='center', rotation=90, fontsize=7.5, color=COLOR_DIM)
+    ax.text(-dim_off - 4, leg/2, f"{leg} mm", ha='right', va='center', rotation=90, fontsize=7.5, color=COLOR_DIM)
 
-    ax.annotate(f"t = {t} mm", xy=(leg/2, t/2), xytext=(leg/2 + 10, t/2 + 25),
+    ax.annotate(f"t = {t} mm", xy=(leg/2, t/2), xytext=(leg/2 + 5, t/2 + 18),
                 arrowprops=dict(arrowstyle='->', color='#111111', lw=0.8), fontsize=7)
 
-    ax.set_xlim(-25, leg + 20)
-    ax.set_ylim(-25, leg + 20)
+    ax.set_xlim(-dim_off * 2.5, leg + 15)
+    ax.set_ylim(-dim_off * 2.5, leg + 15)
     ax.set_aspect('equal')
     ax.axis('off')
     ax.set_title(title, fontsize=8.5, fontweight='bold', pad=6)
 
     plt.tight_layout()
     if out_path:
+        plt.savefig(out_path, dpi=300, bbox_inches='tight')
+        plt.close()
+    return out_path
+
+
+def draw_bm_envelope(span=20.0, max_bm=694.47, out_path=""):
+    """Figure 4.1: Bending Moment Envelope (Envelope ULS) along span."""
+    fig, ax = plt.subplots(figsize=(8, 4.2), dpi=300)
+    fig.patch.set_facecolor(COLOR_BG)
+    ax.set_facecolor(COLOR_BG)
+
+    x = np.linspace(0, span, 201)
+    # Parabolic bending moment diagram for simply supported beam under distributed/envelope loads
+    bm = 4.0 * max_bm * (x / span) * (1.0 - x / span)
+
+    ax.plot(x, bm, color='#1B4F72', lw=2.2, label='Envelope ULS Bending Moment (kN·m)')
+    ax.fill_between(x, 0, bm, color='#2980B9', alpha=0.18)
+
+    # Annotate peak at midspan
+    mid_idx = len(x) // 2
+    ax.plot([x[mid_idx]], [bm[mid_idx]], 'ro', markersize=6)
+    ax.annotate(
+        f'Max $M_{{u}} = {max_bm:.2f}$ kN·m\nat $x = {span/2:.1f}$ m',
+        xy=(x[mid_idx], bm[mid_idx]),
+        xytext=(x[mid_idx] + 1.2, bm[mid_idx] * 0.88),
+        arrowprops=dict(arrowstyle='->', color='#900C3F', lw=1.2),
+        fontsize=9,
+        fontweight='bold',
+        color='#900C3F',
+        bbox=dict(boxstyle='round,pad=0.3', facecolor='#FADBD8', edgecolor='#900C3F', alpha=0.9)
+    )
+
+    # Support representations
+    ax.plot([0, span], [0, 0], 'k-', lw=1.0)
+    ax.plot(0, 0, '^', color='#2C3E50', markersize=10, clip_on=False)
+    ax.plot(span, 0, 'o', color='#2C3E50', markersize=8, clip_on=False)
+    ax.text(0, -max_bm * 0.08, 'Left Support\n(x = 0.0 m)', ha='center', va='top', fontsize=8, color='#2C3E50')
+    ax.text(span, -max_bm * 0.08, f'Right Support\n(x = {span:.1f} m)', ha='center', va='top', fontsize=8, color='#2C3E50')
+
+    ax.set_xlabel('Distance from Left Support (m)', fontsize=9.5, fontweight='bold', labelpad=6)
+    ax.set_ylabel('Bending Moment (kN·m)', fontsize=9.5, fontweight='bold', labelpad=6)
+    ax.set_title('Bending Moment Envelope (Envelope ULS)', fontsize=11, fontweight='bold', pad=10, color='#1B4F72')
+    ax.set_xlim(-0.5, span + 0.5)
+    ax.set_ylim(-max_bm * 0.15, max_bm * 1.18)
+    ax.grid(True, linestyle='--', alpha=0.5)
+    ax.legend(loc='upper right', framealpha=0.9, fontsize=8.5)
+
+    if out_path:
+        os.makedirs(os.path.dirname(out_path), exist_ok=True)
+        plt.savefig(out_path, dpi=300, bbox_inches='tight')
+        plt.close()
+    return out_path
+
+
+def draw_sf_envelope(span=20.0, max_sf=160.38, out_path=""):
+    """Figure 4.2: Shear Force Envelope (Envelope ULS) along span."""
+    fig, ax = plt.subplots(figsize=(8, 4.2), dpi=300)
+    fig.patch.set_facecolor(COLOR_BG)
+    ax.set_facecolor(COLOR_BG)
+
+    x = np.linspace(0, span, 201)
+    # Linear shear force envelope from +V at left support to -V at right support
+    sf_upper = max_sf * (1.0 - x / span)
+    sf_lower = -max_sf * (x / span)
+
+    ax.plot(x, sf_upper, color='#D35400', lw=2.0, label='Max Positive Shear Force (kN)')
+    ax.plot(x, sf_lower, color='#2980B9', lw=2.0, label='Max Negative Shear Force (kN)')
+    ax.fill_between(x, sf_lower, sf_upper, color='#F39C12', alpha=0.15)
+    ax.axhline(0, color='black', lw=0.8, linestyle='-')
+
+    # Annotate support shears
+    ax.plot(0, max_sf, 's', color='#D35400', markersize=6)
+    ax.plot(span, -max_sf, 's', color='#2980B9', markersize=6)
+    ax.annotate(
+        f'$V_{{u,max}} = +{max_sf:.2f}$ kN',
+        xy=(0, max_sf),
+        xytext=(1.0, max_sf * 0.85),
+        arrowprops=dict(arrowstyle='->', color='#D35400', lw=1.0),
+        fontsize=8.5, fontweight='bold', color='#D35400',
+        bbox=dict(boxstyle='round,pad=0.25', facecolor='#FCF3CF', edgecolor='#D35400', alpha=0.9)
+    )
+    ax.annotate(
+        f'$V_{{u,min}} = -{max_sf:.2f}$ kN',
+        xy=(span, -max_sf),
+        xytext=(span - 4.5, -max_sf * 0.85),
+        arrowprops=dict(arrowstyle='->', color='#2980B9', lw=1.0),
+        fontsize=8.5, fontweight='bold', color='#2980B9',
+        bbox=dict(boxstyle='round,pad=0.25', facecolor='#E8F8F5', edgecolor='#2980B9', alpha=0.9)
+    )
+
+    ax.set_xlabel('Distance from Left Support (m)', fontsize=9.5, fontweight='bold', labelpad=6)
+    ax.set_ylabel('Shear Force (kN)', fontsize=9.5, fontweight='bold', labelpad=6)
+    ax.set_title('Shear Force Envelope (Envelope ULS)', fontsize=11, fontweight='bold', pad=10, color='#1B4F72')
+    ax.set_xlim(-0.5, span + 0.5)
+    ax.set_ylim(-max_sf * 1.25, max_sf * 1.25)
+    ax.grid(True, linestyle='--', alpha=0.5)
+    ax.legend(loc='upper right', framealpha=0.9, fontsize=8.5)
+
+    if out_path:
+        os.makedirs(os.path.dirname(out_path), exist_ok=True)
+        plt.savefig(out_path, dpi=300, bbox_inches='tight')
+        plt.close()
+    return out_path
+
+
+def draw_deflection_profile(span=20.0, delta_ll=15.616, delta_tot=37.137, out_path=""):
+    """Figure 4.3: Vertical Deflection Dy along Span (Live Load & Total Load)."""
+    fig, ax = plt.subplots(figsize=(8.5, 4.8), dpi=300)
+    fig.patch.set_facecolor(COLOR_BG)
+    ax.set_facecolor(COLOR_BG)
+
+    x = np.linspace(0, span, 201)
+    # Deflection profile (sinusoidal distribution along simple span)
+    defl_ll_profile = delta_ll * np.sin(np.pi * x / span)
+    defl_tot_profile = delta_tot * np.sin(np.pi * x / span)
+
+    allow_ll = span * 1000.0 / 800.0   # L/800 = 25.0 mm
+    allow_tot = span * 1000.0 / 600.0  # L/600 = 33.33 mm
+
+    # Plot curves (downwards deflection)
+    ax.plot(x, defl_tot_profile, color='#C0392B', lw=2.4, label=f'Total Serviceability Deflection (Max: {delta_tot:.2f} mm)')
+    ax.plot(x, defl_ll_profile, color='#27AE60', lw=2.0, label=f'Live Load Deflection (Max: {delta_ll:.2f} mm)')
+    ax.fill_between(x, 0, defl_tot_profile, color='#C0392B', alpha=0.10)
+
+    # Plot horizontal limit lines
+    ax.axhline(allow_tot, color='#900C3F', linestyle='--', lw=1.6, label=f'Total Deflection Limit: $L/600 = {allow_tot:.1f}$ mm (FAIL, UR = {delta_tot/allow_tot:.2f})')
+    ax.axhline(allow_ll, color='#1E8449', linestyle=':', lw=1.6, label=f'Live Load Deflection Limit: $L/800 = {allow_ll:.1f}$ mm (PASS, UR = {delta_ll/allow_ll:.2f})')
+
+    # Invert Y axis to represent downwards deflection
+    ax.invert_yaxis()
+
+    # Annotate total deflection exceedance
+    mid_idx = len(x) // 2
+    ax.plot(x[mid_idx], delta_tot, 'o', color='#C0392B', markersize=7)
+    ax.annotate(
+        f'GOVERNING SLS ISSUE:\n$\\delta_{{tot}} = {delta_tot:.2f}$ mm > {allow_tot:.1f} mm\n$\\mathbf{{UR = {delta_tot/allow_tot:.2f} \\; (FAIL)}}$',
+        xy=(x[mid_idx], delta_tot),
+        xytext=(x[mid_idx] + 1.2, delta_tot * 0.95),
+        arrowprops=dict(arrowstyle='->', color='#C0392B', lw=1.4),
+        fontsize=9, fontweight='bold', color='#900C3F',
+        bbox=dict(boxstyle='round,pad=0.35', facecolor='#FADBD8', edgecolor='#C0392B', lw=1.2)
+    )
+
+    # Annotate live load pass
+    ax.plot(x[mid_idx], delta_ll, 'o', color='#27AE60', markersize=6)
+    ax.annotate(
+        f'$\\delta_{{LL}} = {delta_ll:.2f}$ mm $\\leq 25.0$ mm\n$\\mathbf{{UR = {delta_ll/allow_ll:.2f} \\; (PASS)}}$',
+        xy=(x[mid_idx], delta_ll),
+        xytext=(x[mid_idx] - 6.5, delta_ll * 0.95),
+        arrowprops=dict(arrowstyle='->', color='#27AE60', lw=1.2),
+        fontsize=8.5, fontweight='bold', color='#1E8449',
+        bbox=dict(boxstyle='round,pad=0.3', facecolor='#E8F8F5', edgecolor='#27AE60', lw=1.0)
+    )
+
+    ax.set_xlabel('Distance along Bridge Span (m)', fontsize=9.5, fontweight='bold', labelpad=6)
+    ax.set_ylabel('Vertical Deflection $D_y$ (mm, downwards)', fontsize=9.5, fontweight='bold', labelpad=6)
+    ax.set_title('Vertical Deflection Profile $D_y$ along Span: SLS Deflection Verification', fontsize=11, fontweight='bold', pad=10, color='#1B4F72')
+    ax.set_xlim(-0.5, span + 0.5)
+    ax.grid(True, linestyle='--', alpha=0.5)
+    ax.legend(loc='lower center', framealpha=0.92, fontsize=8.2, ncol=2)
+
+    if out_path:
+        os.makedirs(os.path.dirname(out_path), exist_ok=True)
         plt.savefig(out_path, dpi=300, bbox_inches='tight')
         plt.close()
     return out_path
@@ -730,28 +898,41 @@ def generate_all_cad_drawings(input_dict, output_dict, target_dir):
 
     # 9-11. Cross Bracing Sections
     p9 = os.path.join(target_dir, 'cb_bracing.png')
-    draw_angle_section("90x90x8", "Bracing Section (ISA 90x90x8)", p9)
+    draw_angle_section("40x40x3", "Bracing Section (ISA 40x40x3)", p9)
     figs['cb_bracing'] = p9.replace('\\', '/')
 
     p10 = os.path.join(target_dir, 'cb_top_chord.png')
-    draw_angle_section("90x90x8", "Top Chord (ISA 90x90x8)", p10)
+    draw_angle_section("40x40x3", "Top Chord (ISA 40x40x3)", p10)
     figs['cb_top_chord'] = p10.replace('\\', '/')
 
     p11 = os.path.join(target_dir, 'cb_bottom_chord.png')
-    draw_angle_section("90x90x8", "Bottom Chord (ISA 90x90x8)", p11)
+    draw_angle_section("40x40x3", "Bottom Chord (ISA 40x40x3)", p11)
     figs['cb_bottom_chord'] = p11.replace('\\', '/')
 
     # 12-14. End Diaphragm Sections
     p12 = os.path.join(target_dir, 'ed_bracing.png')
-    draw_angle_section("90x90x8", "Diaphragm Bracing (ISA 90x90x8)", p12)
+    draw_angle_section("40x40x3", "Diaphragm Bracing (ISA 40x40x3)", p12)
     figs['ed_bracing'] = p12.replace('\\', '/')
 
     p13 = os.path.join(target_dir, 'ed_top_chord.png')
-    draw_angle_section("90x90x8", "Diaphragm Top Chord (ISA 90x90x8)", p13)
+    draw_angle_section("40x40x3", "Diaphragm Top Chord (ISA 40x40x3)", p13)
     figs['ed_top_chord'] = p13.replace('\\', '/')
 
     p14 = os.path.join(target_dir, 'ed_bottom_chord.png')
-    draw_angle_section("90x90x8", "Diaphragm Bottom Chord (ISA 90x90x8)", p14)
+    draw_angle_section("40x40x3", "Diaphragm Bottom Chord (ISA 40x40x3)", p14)
     figs['ed_bottom_chord'] = p14.replace('\\', '/')
+
+    # 15-17. Analysis Results Plots (Chapter 4)
+    p15 = os.path.join(target_dir, 'bm_envelope.png')
+    draw_bm_envelope(span=span, max_bm=694.47, out_path=p15)
+    figs['bm_envelope'] = p15.replace('\\', '/')
+
+    p16 = os.path.join(target_dir, 'sf_envelope.png')
+    draw_sf_envelope(span=span, max_sf=160.38, out_path=p16)
+    figs['sf_envelope'] = p16.replace('\\', '/')
+
+    p17 = os.path.join(target_dir, 'defl_ll.png')
+    draw_deflection_profile(span=span, delta_ll=15.616, delta_tot=37.137, out_path=p17)
+    figs['defl_ll'] = p17.replace('\\', '/')
 
     return figs

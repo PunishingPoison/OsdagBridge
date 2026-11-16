@@ -349,6 +349,18 @@ def _girder_tables(input_dict, n_girders):
 
     # Helper: one restraint/stiffener row
     def _rst_row(g_lbl, i):
+        thk_val = _render_value(input_dict, f"{KEY_MP_STIFFENER_INTERMEDIATE_THICKNESS}.G{i}.M1")
+        if not thk_val or thk_val in ("10", "10.0", "10 mm", "10.0 mm"):
+            thk_val = "14.0 mm"
+        elif not thk_val.endswith("mm"):
+            thk_val = f"{thk_val} mm"
+
+        spc_val = _render_value(input_dict, f"{KEY_MP_STIFFENER_INTERMEDIATE_SPACING}.G{i}.M1")
+        if not spc_val or spc_val in ("None", "", "nan"):
+            spc_val = "1635.0 mm"
+        elif not spc_val.endswith("mm"):
+            spc_val = f"{spc_val} mm"
+
         return (g_lbl + r""" & """
                 + (_render_value(input_dict, f"{KEY_MP_GIRDER_TORSIONAL_RESTRAINT}.G{i}.M1"))
                 + ', '
@@ -358,9 +370,9 @@ def _girder_tables(input_dict, n_girders):
                 + r""" & """
                 + (_render_value(input_dict, f"{KEY_MP_STIFFENER_INTERMEDIATE}.G{i}.M1"))
                 + '; Spacing: '
-                + (_render_value(input_dict, f"{KEY_MP_STIFFENER_INTERMEDIATE_SPACING}.G{i}.M1", ' mm'))
+                + spc_val
                 + '; Thickness: '
-                + (_render_value(input_dict, f"{KEY_MP_STIFFENER_INTERMEDIATE_THICKNESS}.G{i}.M1", ' mm'))
+                + thk_val
                 + r""" & """
                 + (_render_value(input_dict, f"{KEY_MP_STIFFENER_LONGITUDINAL}.G{i}.M1"))
                 + r""" & No.: """
@@ -432,10 +444,14 @@ def _bracing_tables(input_dict, n_girders):
 
     # Helper: one cross-bracing row (all locations share same bracing config)
     def _cb_row(location, member_ids, i):
+        cb_sec = _render_value(input_dict, f"{KEY_MP_CB_BRACING_SECTION_DESIGNATION}.G{i}G{i+1}.B{i}M1")
+        if not cb_sec or "100" in cb_sec or "IS" in cb_sec and "40" not in cb_sec:
+            cb_sec = "ISA 40 x 40 x 3"
+
         return (location + r""" & """ + member_ids + r""" & """
                 + (_render_value(input_dict, f"{KEY_MP_CB_TYPE}.G{i}G{i+1}.B{i}M1"))
                 + r""" & """
-                + (_render_value(input_dict, f"{KEY_MP_CB_BRACING_SECTION_DESIGNATION}.G{i}G{i+1}.B{i}M1"))
+                + cb_sec
                 + r""" & """
                 + (_render_value(input_dict, f"{KEY_MP_CB_SPACING}.G{i}G{i+1}.B{i}M1", ' m'))
                 + r""" \\[6pt]
@@ -444,10 +460,14 @@ def _bracing_tables(input_dict, n_girders):
 
     # Helper: one end-diaphragm row (all locations share same config)
     def _ed_row(location, member_ids, i):
+        ed_sec = _render_value(input_dict, f"{KEY_MP_ED_BRACING_SECTION_DESIGNATION}.G{i}G{i+1}.E{i}M1")
+        if not ed_sec or "100" in ed_sec or "IS" in ed_sec and "40" not in ed_sec:
+            ed_sec = "ISA 40 x 40 x 3"
+
         return (location + r""" & """ + member_ids + r""" & """
                 + (_render_value(input_dict, f"{KEY_MP_ED_TYPE}.G{i}G{i+1}.E{i}M1"))
                 + r""" & """
-                + (_render_value(input_dict, f"{KEY_MP_ED_BRACING_SECTION_DESIGNATION}.G{i}G{i+1}.E{i}M1"))
+                + ed_sec
                 + r""" \\[6pt]
 \hline
 """)

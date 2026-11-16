@@ -371,8 +371,7 @@ This section summarizes all loads applied to the bridge and the load combination
 \hline
 \end{longtable}
 
-\vspace{1em}
-""" + NEEDSPACE_TABLE + r"""
+\newpage
 \begin{longtable}{|C{4.0cm}|p{11.5cm}|}
 \caption{\textbf{Load Combinations}} \\
 """ + hdr_comb + r"""
