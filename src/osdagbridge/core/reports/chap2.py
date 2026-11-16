@@ -377,7 +377,7 @@ def _girder_tables(input_dict, n_girders):
                 + (_render_value(input_dict, f"{KEY_MP_STIFFENER_LONGITUDINAL}.G{i}.M1"))
                 + r""" & No.: """
                 + (_render_value(input_dict, f"{KEY_MP_STIFFENER_NO_BEARING_STIFFENERS}.G{i}.M1"))
-                + '; Spacing: '
+                + '; Pair Spacing: '
                 + (_render_value(input_dict, f"{KEY_MP_STIFFENER_SPACING}.G{i}.M1", ' mm'))
                 + '; Thickness: '
                 + (_render_value(input_dict, f"{KEY_MP_STIFFENER_BEARING_THICKNESS}.G{i}.M1", ' mm'))
@@ -426,6 +426,7 @@ def _girder_tables(input_dict, n_girders):
 """
             + rst_rows
             + r"""\end{longtable}
+\noindent\textit{Note: Bearing stiffener spacing denotes the longitudinal center-to-center spacing between the pair of stiffener plates provided at each support bearing location.}
 """)
 
 

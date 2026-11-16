@@ -1662,13 +1662,14 @@ class IRC22CapacityCalculator:
         KL = 0.7 * d
 
         # Cl.509.7.3.1 / IS 800 8.7.3.1 — Web buckling check
-        # Checks if the unstiffened web bearing zone can carry R (Euler stress, no imperfection reduction).
-        n1      = d / 2.0
-        A_wb    = (b1 + n1) * tw
-        rys_wb  = math.sqrt(Iys / A_wb) if A_wb > 0 else 0.0
-        KL_r_wb = KL / rys_wb if rys_wb > 0 else 1e9
-        fcc_wb  = (math.pi**2 * E) / KL_r_wb**2
-        Fcdw_wb_kN = fcc_wb * A_wb / 1000.0
+        # Checks if the unstiffened web bearing zone can carry R.
+        # Out-of-plane radius of gyration of web plate = tw / sqrt(12)
+        n1         = d / 2.0
+        A_wb       = (b1 + n1) * tw
+        rys_wb     = tw / math.sqrt(12.0) if tw > 0 else 0.0
+        KL_r_wb    = KL / rys_wb if rys_wb > 0 else 1e9
+        fcd_wb     = IS800_2007.cl_7_1_2_1_design_compressisive_stress_plategirder(fy, gm0, KL_r_wb, E)
+        Fcdw_wb_kN = fcd_wb * A_wb / 1000.0
 
         # Cl.509.7.3.2 / IS 800 8.7.3.2 — Local crushing check
         n2         = 2.5 * sec.tf_top
@@ -1705,7 +1706,7 @@ class IRC22CapacityCalculator:
             "A_wb_mm2"          : round(A_wb, 3),
             "rys_wb_mm"         : round(rys_wb, 3),
             "KL_mm"             : round(KL, 3),
-            "fcc_wb_MPa"        : round(fcc_wb, 3),
+            "fcc_wb_MPa"        : round(fcd_wb, 3),
             "Fcdw_wb_kN"        : round(Fcdw_wb_kN, 3),
             "n2_mm"             : round(n2, 3),
             "A_lc_mm2"          : round(A_lc, 3),
