@@ -6,6 +6,7 @@ from osdagbridge.core.utils.common import (
     KEY_SD_DEFL_TOTAL,
 )
 from osdagbridge.core.reports.report_utils import _tex, _fig_embed
+from osdagbridge.core.reports.styles import make_longtable_header, NEEDSPACE_TABLE
 
 if TYPE_CHECKING:
     from .report_generator import ReportDataBridge
@@ -75,6 +76,10 @@ def ch4_analysis(asum, fig_paths, bridge: "ReportDataBridge", span_m: float):
     _allow_total_str = f"L/600 = {_allow_total_mm:.1f} mm"
     _live_status     = ("PASS" if _live_mm  <= _allow_live_mm  else r"\textcolor{red}{FAIL}") if _live_mm  is not None else "---"
     _total_status    = ("PASS" if _total_mm <= _allow_total_mm else r"\textcolor{red}{FAIL}") if _total_mm is not None else "---"
+
+    t42_hdr = make_longtable_header(r"\textbf{Load Case} & \textbf{Left Support (kN)} & \textbf{Right Support (kN)} \\[6pt]", 3)
+    t43_hdr = make_longtable_header(r"\textbf{parameter} & \textbf{value} \\[6pt]", 2)
+
     return r"""
 \chapter{Analysis Results}
 
@@ -86,6 +91,7 @@ A grillage model was used for structural analysis. The deck is idealized as a gr
 \setlength{\tabcolsep}{3pt}
 \renewcommand{\arraystretch}{1.25}
 
+""" + NEEDSPACE_TABLE + r"""
 \begin{longtable}{|
 >{\centering\arraybackslash}p{3.1cm}|
 >{\centering\arraybackslash}p{1.7cm}|
@@ -134,6 +140,13 @@ A grillage model was used for structural analysis. The deck is idealized as a gr
 \hline
 \endhead
 
+\hline
+\multicolumn{9}{r}{\textit{\footnotesize Continued on next page...}} \\
+\endfoot
+
+\hline
+\endlastfoot
+
 """ + merged_body + r"""
 
 \hline
@@ -141,11 +154,10 @@ A grillage model was used for structural analysis. The deck is idealized as a gr
 \endgroup
 
 \vspace{1em}
+""" + NEEDSPACE_TABLE + r"""
 \begin{longtable}{|>{\centering\arraybackslash}p{5.2cm}|>{\centering\arraybackslash}p{5.2cm}|>{\centering\arraybackslash}p{5.2cm}|}
-\caption{\textbf{Reactions at Supports}}
-\hline
-\textbf{Load Case} & \textbf{Left Support (kN)} & \textbf{Right Support (kN)} \\[6pt]
-\hline
+\caption{\textbf{Reactions at Supports}} \\
+""" + t42_hdr + r"""
  & """ + '' + r""" & """ + '' + r""" \\[6pt]
 \hline
  & """ + '' + r""" & """ + '' + r""" \\[6pt]
@@ -155,11 +167,10 @@ A grillage model was used for structural analysis. The deck is idealized as a gr
 \end{longtable}
 
 \vspace{1em}
+""" + NEEDSPACE_TABLE + r"""
 \begin{longtable}{|L{7cm}|p{8.5cm}|}
-\caption{\textbf{Deflection Summary (Live Load \& Total Load)}}
-\hline
-\textbf{parameter} & \textbf{value} \\
-\hline
+\caption{\textbf{Deflection Summary (Live Load \& Total Load)}} \\
+""" + t43_hdr + r"""
 \textnormal{Deflection due to Live Load, $\delta_{LL}$} & """ + _live_str + r""" \\[6pt]
 \hline
 \textnormal{Allowable Live Load Deflection ($\Delta_{allow}$)} & """ + _allow_live_str + r""" \\[6pt]

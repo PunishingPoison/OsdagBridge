@@ -129,6 +129,16 @@ from .chap6 import ch6_drawings
 from .chap7 import ch7_quantities
 from .chap8 import ch8_design_log
 from .chap9 import references
+from .styles import (
+    LATEX_COLOR_DEFINITIONS,
+    LATEX_GEOMETRY_OPTIONS,
+    LATEX_PENALTIES,
+    ARRAY_STRETCH,
+    TABCOLSEP_PT,
+    extract_ur_summary_data,
+    generate_ur_summary_chart,
+    generate_material_quantity_charts,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -156,7 +166,7 @@ def preamble(project_name, job_number, report_date, report_version='Rev 0'):
 \documentclass[12pt,a4paper]{report}
 
 % Packages
-\usepackage[a4paper, margin=1in]{geometry}
+\usepackage[""" + LATEX_GEOMETRY_OPTIONS + r"""]{geometry}
 \usepackage{graphicx}
 \usepackage{amsmath}
 \usepackage{amssymb}
@@ -193,20 +203,23 @@ def preamble(project_name, job_number, report_date, report_version='Rev 0'):
 \numberwithin{table}{chapter}
 \numberwithin{figure}{chapter}
 % Table layout and spacing: consistent padding, row height, and longtable pre/post skips
-\setlength{\tabcolsep}{6pt}
-\renewcommand{\arraystretch}{1.12}
+\setlength{\tabcolsep}{""" + str(TABCOLSEP_PT) + r"""pt}
+\renewcommand{\arraystretch}{""" + str(ARRAY_STRETCH) + r"""}
 \setlength{\LTpre}{0pt}
 \setlength{\LTpost}{6pt}
 % Table rules (outline thickness) and small extra row height for clarity
 \setlength{\arrayrulewidth}{0.5pt}
-\setlength{\extrarowheight}{0.6pt}
+\setlength{\extrarowheight}{0.8pt}
 
 % Prevent tables from overflowing past the page bottom:
-% if fewer than 5 baseline-skips remain, break to the next page first.
-\BeforeBeginEnvironment{table}{\needspace{5\baselineskip}}
-\BeforeBeginEnvironment{longtable}{\needspace{5\baselineskip}}
+\BeforeBeginEnvironment{table}{\needspace{6\baselineskip}}
+\BeforeBeginEnvironment{longtable}{\needspace{6\baselineskip}}
 
-\definecolor{osdagGreen}{HTML}{91B014}
+% Document penalties to prevent orphan/widow table rows and headers
+""" + LATEX_PENALTIES + r"""
+
+% Centralized Color Definitions
+""" + LATEX_COLOR_DEFINITIONS + r"""
 
 \fancypagestyle{main}{
   \fancyhf{}
@@ -217,13 +230,11 @@ def preamble(project_name, job_number, report_date, report_version='Rev 0'):
   \renewcommand{\headrule}{\color{osdagGreen}\hrule width\headwidth height 1pt \vspace{2pt}}
   \renewcommand{\footrule}{%
     \ifbool{hasSDonPage}{%
-      \vspace{-20pt}%
+      \vspace{-14pt}%
       \hbox to \headwidth{\textcolor{black}{\footnotesize\textit{* Software default value}}\hfil}%
-      \vspace{4pt}%
-    }{%
-      \vspace{-8pt}%
-    }%
-    \color{osdagGreen}\hrule width\headwidth height 1pt \vspace{6pt}%
+      \vspace{2pt}%
+    }{}%
+    \color{osdagGreen}\hrule width\headwidth height 1pt \vspace{4pt}%
   }
 }
 \fancypagestyle{plain}{
@@ -235,13 +246,11 @@ def preamble(project_name, job_number, report_date, report_version='Rev 0'):
   \renewcommand{\headrule}{\color{osdagGreen}\hrule width\headwidth height 1pt \vspace{2pt}}
   \renewcommand{\footrule}{%
     \ifbool{hasSDonPage}{%
-      \vspace{-20pt}%
+      \vspace{-14pt}%
       \hbox to \headwidth{\textcolor{black}{\footnotesize\textit{* Software default value}}\hfil}%
-      \vspace{4pt}%
-    }{%
-      \vspace{-8pt}%
-    }%
-    \color{osdagGreen}\hrule width\headwidth height 1pt \vspace{6pt}%
+      \vspace{2pt}%
+    }{}%
+    \color{osdagGreen}\hrule width\headwidth height 1pt \vspace{4pt}%
   }
 }
 \fancypagestyle{firstpage}{
@@ -249,7 +258,7 @@ def preamble(project_name, job_number, report_date, report_version='Rev 0'):
   \renewcommand{\headrulewidth}{0pt}
   \fancyfoot[L]{Osdag $|$ FOSSEE $|$ Indian Institute of Technology Bombay}
   \fancyfoot[R]{Page \thepage\ of \pageref{LastPage}}
-  \renewcommand{\footrule}{\vspace{-8pt}\color{osdagGreen}\hrule width\headwidth height 1pt \vspace{6pt}}
+  \renewcommand{\footrule}{\color{osdagGreen}\hrule width\headwidth height 1pt \vspace{4pt}}
 }
 \pagestyle{main}
 \setstretch{1.15}
@@ -903,6 +912,18 @@ def generate_report(payload, request):
             bridge = ReportDataBridge(payload.output_dict, payload.inputs, payload)
             span_m = float(payload.inputs.get(KEY_SPAN, 0) or 0)
 
+            # ── Generate & wire Section 5.5 UR Summary chart ──────────────
+            ur_summary_file = os.path.join(tmp_images, 'ur_summary.png')
+            ur_data = extract_ur_summary_data(payload.output_dict, bridge)
+            if generate_ur_summary_chart(ur_data, ur_summary_file):
+                fig_paths['ur_summary'] = ur_summary_file.replace('\\', '/')
+
+            # ── Generate & wire Chapter 7 BOM Quantity charts ─────────────
+            bom_figs = generate_material_quantity_charts(payload.inputs, tmp_images)
+            for k, p in bom_figs.items():
+                if p and os.path.exists(p):
+                    fig_paths[k] = p.replace('\\', '/')
+
             doc_parts = []
             doc_parts.append(preamble(payload.metadata.project_name, payload.metadata.job_number, payload.metadata.report_date, payload.metadata.subtitle or 'Rev 0'))
             doc_parts.append(title_page(payload.metadata, osdag_logo_latex, org_logo_latex))
@@ -919,16 +940,16 @@ def generate_report(payload, request):
             doc_parts.append(ch1_project_info(payload.metadata))
             doc_parts.append(ch2_input_parameters(payload.metadata, payload.inputs, payload.output_dict))
 
-            if 'loads' in secs:
+            if 'loads' in secs or 'loads_and_combinations' in secs:
                 doc_parts.append(ch3_loads(payload.inputs))
-            if 'analysis' in secs:
+            if 'analysis' in secs or 'analysis_results' in secs:
                 doc_parts.append(ch4_analysis(payload.analysis_summary, fig_paths, bridge, span_m))
             if 'design_checks' in secs:
-                doc_parts.append(ch5_design_checks(payload.design_checks, bridge))
-            if 'drawings' in secs and payload.options.include_figures:
+                doc_parts.append(ch5_design_checks(payload.design_checks, bridge, fig_paths))
+            if ('drawings' in secs or 'drawings_and_visualizations' in secs) and payload.options.include_figures:
                 doc_parts.append(ch6_drawings(fig_paths))
 
-            doc_parts.append(ch7_quantities(payload.inputs))
+            doc_parts.append(ch7_quantities(payload.inputs, fig_paths))
 
             mode = str(payload.inputs.get(KEY_DESIGN_MODE, "Optimized")).strip().lower()
             is_custom = mode in {"custom", "customized"}

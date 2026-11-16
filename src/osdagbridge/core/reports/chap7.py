@@ -1,16 +1,65 @@
-def ch7_quantities(input_dict):
+from osdagbridge.core.reports.styles import make_longtable_header, NEEDSPACE_TABLE
+from osdagbridge.core.reports.report_utils import _fig_or_placeholder
+
+def ch7_quantities(input_dict, fig_paths=None):
+    fig_paths = fig_paths or {}
+    
+    headers = r"\textbf{S.N.} & \textbf{Item Description} & \textbf{Volume} & \textbf{Quantity} & \textbf{Total Volume} & \textbf{Weight (MT)} & \textbf{Total Weight (MT)} \\"
+    table_headers = make_longtable_header(headers, 7)
+
+    steel_fig = fig_paths.get("steel_breakdown")
+    rebar_fig = fig_paths.get("concrete_rebar")
+
+    fig_markup = ""
+    if steel_fig or rebar_fig:
+        fig_markup = r"""
+\vspace{1.5em}
+\noindent\textbf{Material Quantity Summary Visualizations}
+
+\begin{figure}[H]
+\centering
+"""
+        if steel_fig and rebar_fig:
+            fig_markup += r"""
+\begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{""" + steel_fig + r"""}
+    \caption{Structural Steel Tonnage Breakdown}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{""" + rebar_fig + r"""}
+    \caption{Concrete Volume vs. Rebar Weight}
+\end{subfigure}
+\caption{\textbf{Material Quantity Distributions}}
+"""
+        elif steel_fig:
+            fig_markup += r"""
+\includegraphics[width=0.75\textwidth]{""" + steel_fig + r"""}
+\caption{\textbf{Structural Steel Tonnage Breakdown by Component}}
+"""
+        elif rebar_fig:
+            fig_markup += r"""
+\includegraphics[width=0.75\textwidth]{""" + rebar_fig + r"""}
+\caption{\textbf{Concrete Volume vs. Reinforcement Steel Weight}}
+"""
+        fig_markup += r"""
+\label{fig:material_takeoff}
+\end{figure}
+"""
+
     return r"""
 \chapter{Material Take-off \& Quantity Summary}
 \label{ch:material-takeoff}
 
 \noindent\textbf{Table 7.1  Bill of Materials (Steel, Concrete, and Reinforcement Quantities)}
 
+""" + NEEDSPACE_TABLE + r"""
 \begingroup
 \setlength{\tabcolsep}{3.5pt}
 \begin{longtable}{|C{1.0cm}|L{3.8cm}|C{2.6cm}|C{1.8cm}|C{1.8cm}|C{1.8cm}|C{1.8cm}|}
-\hline
-\textbf{S.N.} & \textbf{Item Description} & \textbf{Volume} & \textbf{Quantity} & \textbf{Total Volume} & \textbf{Weight (MT)} & \textbf{Total Weight (MT)} \\
-\hline
+""" + table_headers + r"""
 1 & Structural Steel (IS 2062) for Girders & """ + str(input_dict.get("steel_girders_vol_formula", "N.A.")) + r""" & """ + str(input_dict.get("steel_girders_qty", "N.A.")) + r""" & """ + str(input_dict.get("steel_girders_vol_total", "N.A.")) + r""" & """ + str(input_dict.get("steel_girders_wt_single", "N.A.")) + r""" & """ + str(input_dict.get("steel_girders_wt_total", "N.A.")) + r""" \\
 \hline
 2(a) & Cross Bracing - Top Chord & """ + str(input_dict.get("bracing_top_vol_formula", "N.A.")) + r""" & """ + str(input_dict.get("bracing_top_qty", "N.A.")) + r""" & """ + str(input_dict.get("bracing_top_vol_total", "N.A.")) + r""" & """ + str(input_dict.get("bracing_top_wt_single", "N.A.")) + r""" & """ + str(input_dict.get("bracing_top_wt_total", "N.A.")) + r""" \\
@@ -28,6 +77,6 @@ def ch7_quantities(input_dict):
 6 & Crash Barrier & """ + str(input_dict.get("crash_barrier_vol_formula", "N.A.")) + r""" & """ + str(input_dict.get("crash_barrier_qty", "N.A.")) + r""" & """ + str(input_dict.get("crash_barrier_vol_total", "N.A.")) + r""" & """ + str(input_dict.get("crash_barrier_wt_single", "N.A.")) + r""" & """ + str(input_dict.get("crash_barrier_wt_total", "N.A.")) + r""" \\
 \hline
 \end{longtable}
+\endgroup
+""" + fig_markup + r"""
 """
-
-
