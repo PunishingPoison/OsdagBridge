@@ -75,8 +75,8 @@ LATEX_PENALTIES = r"""
 \displaywidowpenalty=10000
 """
 
-# Spacing rules before tables to prevent bottom page bleed
-NEEDSPACE_TABLE = r"\needspace{6\baselineskip}"
+# Spacing rules before tables to prevent bottom page bleed and orphan headers
+NEEDSPACE_TABLE = r"\needspace{10\baselineskip}"
 
 # =============================================================================
 # 3. LONGTABLE HEADER / FOOTER BUILDER

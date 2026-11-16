@@ -214,8 +214,7 @@ This section summarizes all loads applied to the bridge and the load combination
 \hline
 \end{longtable}
 
-\vspace{1em}
-""" + NEEDSPACE_TABLE + r"""
+\newpage
 \begin{longtable}{|L{3.2cm}|C{2.0cm}|C{1.8cm}|C{2.2cm}|C{2.6cm}|C{2.2cm}|}
 \caption{\textbf{Vehicle Live Loads (LL) Parameters}} \\
 """ + hdr_vll + r"""

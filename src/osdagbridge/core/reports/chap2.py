@@ -436,13 +436,10 @@ def _safety_factors_table(input_dict):
     return r"""
 \label{subsec:safety-factors}
 
-\vspace{2.2em}
-
-\vspace{0.3em}
+\newpage
 \noindent\textit{Note: All values are per IRC 22 Table 1 unless user-modified.}
 
 \vspace{0.4em}
-""" + NEEDSPACE_TABLE + r"""
 \begin{longtable}{|L{5.5cm}|p{10.0cm}|}
 \caption{\textbf{Partial Safety Factors}} \\
 """ + make_longtable_header(r"\textbf{parameter} & \textbf{value} \\", 2) + r"""
