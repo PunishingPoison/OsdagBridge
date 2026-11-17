@@ -231,9 +231,8 @@ def preamble(project_name, job_number, report_date, report_version='Rev 0'):
 \setlength{\arrayrulewidth}{0.5pt}
 \setlength{\extrarowheight}{0.8pt}
 
-% Prevent tables from overflowing past the page bottom:
+% Prevent floating tables from overflowing past the page bottom:
 \BeforeBeginEnvironment{table}{\needspace{6\baselineskip}}
-\BeforeBeginEnvironment{longtable}{\needspace{6\baselineskip}}
 
 % Document penalties to prevent orphan/widow table rows and headers
 """ + LATEX_PENALTIES + r"""

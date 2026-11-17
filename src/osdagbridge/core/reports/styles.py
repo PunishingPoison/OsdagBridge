@@ -76,7 +76,9 @@ LATEX_PENALTIES = r"""
 """
 
 # Spacing rules before tables to prevent bottom page bleed and orphan headers
-NEEDSPACE_TABLE = r"\needspace{10\baselineskip}"
+# Note: longtable handles page breaks natively row-by-row; injecting \needspace immediately
+# before \begin{longtable} causes infinite glue shrinkage errors and false 0-row page breaks.
+NEEDSPACE_TABLE = ""
 
 # =============================================================================
 # 3. LONGTABLE HEADER / FOOTER BUILDER
@@ -284,10 +286,10 @@ def extract_ur_summary_data(output_dict: dict, bridge=None) -> dict:
             pass
     ur_data["bracing"] = {k: round(v, 2) for k, v in bracing_checks.items()}
 
-    # 4. End Diaphragms
+    # 4. End Diaphragms (aligned with Table 5.28 & Table 5.29)
     diaphragm_checks = {
-        "Moment": bracing_checks.get("Compression", 0.17),
-        "Shear": bracing_checks.get("Tension", 0.05),
+        "Compression": bracing_checks.get("Compression", 0.17),
+        "Tension": bracing_checks.get("Tension", 0.05),
         "Slenderness": bracing_checks.get("Slenderness", 0.41),
     }
     ur_data["diaphragm"] = {k: round(v, 2) for k, v in diaphragm_checks.items()}
@@ -423,19 +425,21 @@ def generate_material_quantity_charts(quantities: dict, output_dir: str) -> dict
                 + _safe_float(quantities.get("diaphragm_diag_wt_total"))
             )
 
-        fig1, ax1 = plt.subplots(figsize=(6.5, 4.0))
+        fig1, ax1 = plt.subplots(figsize=(8.0, 3.8))
         y_pos = np.arange(len(steel_labels))
-        bars1 = ax1.barh(y_pos, steel_weights, color=[HEX_SECONDARY, HEX_PRIMARY, "#3498DB"], height=0.5, edgecolor=HEX_BORDER, zorder=3)
+        bars1 = ax1.barh(y_pos, steel_weights, color=[HEX_SECONDARY, HEX_PRIMARY, "#3498DB"], height=0.45, edgecolor=HEX_BORDER, zorder=3)
         ax1.set_yticks(y_pos)
-        ax1.set_yticklabels(steel_labels, fontsize=9, weight='bold')
+        ax1.set_yticklabels(steel_labels, fontsize=10.5, weight='bold')
         ax1.invert_yaxis()  # Labels read top-to-bottom
-        ax1.set_xlabel("Weight (Metric Tonnes - MT)", fontsize=9, weight='bold')
-        ax1.set_title("Structural Steel Tonnage by Component", fontsize=10.5, weight='bold', color=HEX_SECONDARY)
+        ax1.set_xlabel("Weight (Metric Tonnes - MT)", fontsize=10.5, weight='bold')
+        ax1.set_title("Structural Steel Tonnage by Component", fontsize=11.5, weight='bold', color=HEX_SECONDARY, pad=10)
 
+        total_steel = sum(steel_weights) or 1.0
         max_wt = max(steel_weights) if steel_weights and max(steel_weights) > 0 else 1.0
-        ax1.set_xlim(0, max_wt * 1.25)
+        ax1.set_xlim(0, max_wt * 1.30)
         for bar, wt in zip(bars1, steel_weights):
-            ax1.text(bar.get_width() + max_wt * 0.02, bar.get_y() + bar.get_height() / 2.0, f"{wt:.2f} MT", va='center', fontsize=8.5, weight='bold')
+            pct = (wt / total_steel) * 100.0
+            ax1.text(bar.get_width() + max_wt * 0.02, bar.get_y() + bar.get_height() / 2.0, f"{wt:.2f} MT  ({pct:.1f}%)", va='center', fontsize=9.5, weight='bold')
 
         plt.tight_layout()
         path1 = os.path.join(output_dir, "steel_breakdown.png")
@@ -443,34 +447,35 @@ def generate_material_quantity_charts(quantities: dict, output_dir: str) -> dict
         plt.close(fig1)
         res["steel_breakdown"] = path1
 
-        # ── 2. Concrete Volume vs Reinforcement Steel Weight ───────────────────
+        # ── 2. Concrete Volume vs Reinforcement Steel Weight (Separate Subplots) ─
         conc_vol = _safe_float(quantities.get("concrete_deck_vol_total"))
         rebar_wt = _safe_float(quantities.get("rebar_deck_wt_total"))
 
-        fig2, ax2_left = plt.subplots(figsize=(6.5, 4.0))
-        ax2_right = ax2_left.twinx()
+        fig2, (ax2_c, ax2_r) = plt.subplots(1, 2, figsize=(8.0, 3.8))
 
-        x = np.array([0, 1])
-        w = 0.4
+        # Left Subplot: Concrete Deck Volume (m³)
+        b1 = ax2_c.bar([0], [conc_vol], width=0.45, color="#546E7A", edgecolor=HEX_BORDER, linewidth=0.8, zorder=3)
+        ax2_c.set_ylabel(r"Concrete Volume ($\mathrm{m^3}$)", fontsize=10.5, weight='bold', color="#263238")
+        max_c = conc_vol if conc_vol > 0 else 1.0
+        ax2_c.set_ylim(0, max_c * 1.30)
+        ax2_c.set_xticks([0])
+        ax2_c.set_xticklabels(["Concrete Deck Slab"], fontsize=10, weight='bold')
+        ax2_c.set_title(r"Deck Concrete Volume ($\mathrm{m^3}$)", fontsize=11, weight='bold', color=HEX_SECONDARY, pad=10)
+        ax2_c.text(0, conc_vol + max_c * 0.04, f"{conc_vol:.2f} m³", ha='center', fontsize=10, weight='bold', color="#263238")
+        ax2_c.grid(True, linestyle='--', alpha=0.6, axis='y')
 
-        b1 = ax2_left.bar(0, conc_vol, width=w, color="#7F8C8D", label="Concrete Deck", edgecolor=HEX_BORDER, zorder=3)
-        b2 = ax2_right.bar(1, rebar_wt, width=w, color=HEX_PRIMARY, label="Reinforcement Steel", edgecolor=HEX_BORDER, zorder=3)
+        # Right Subplot: Rebar Steel Weight (MT)
+        b2 = ax2_r.bar([0], [rebar_wt], width=0.45, color=HEX_PRIMARY, edgecolor=HEX_BORDER, linewidth=0.8, zorder=3)
+        ax2_r.set_ylabel("Rebar Weight (Metric Tonnes - MT)", fontsize=10.5, weight='bold', color=HEX_PRIMARY_DARK)
+        max_r = rebar_wt if rebar_wt > 0 else 1.0
+        ax2_r.set_ylim(0, max_r * 1.30)
+        ax2_r.set_xticks([0])
+        ax2_r.set_xticklabels(["Deck Reinforcement Steel"], fontsize=10, weight='bold')
+        ax2_r.set_title("Reinforcement Steel Weight (MT)", fontsize=11, weight='bold', color=HEX_SECONDARY, pad=10)
+        ax2_r.text(0, rebar_wt + max_r * 0.04, f"{rebar_wt:.2f} MT", ha='center', fontsize=10, weight='bold', color=HEX_PRIMARY_DARK)
+        ax2_r.grid(True, linestyle='--', alpha=0.6, axis='y')
 
-        ax2_left.set_ylabel(r"Concrete Volume ($\mathrm{m^3}$)", fontsize=9, weight='bold', color="#4A5568")
-        ax2_right.set_ylabel("Rebar Weight (MT)", fontsize=9, weight='bold', color=HEX_PRIMARY_DARK)
-        ax2_left.set_xticks(x)
-        ax2_left.set_xticklabels([r"Concrete ($\mathrm{m^3}$)", "Reinforcement (MT)"], fontsize=9, weight='bold')
-        ax2_left.set_title(r"Concrete Volume ($\mathrm{m^3}$) vs. Reinforcement Steel Weight (MT)", fontsize=10, weight='bold', color=HEX_SECONDARY)
-
-        ax2_left.set_ylim(0, (conc_vol or 1.0) * 1.3)
-        ax2_right.set_ylim(0, (rebar_wt or 1.0) * 1.3)
-
-        ax2_left.text(0, conc_vol + (conc_vol or 1.0) * 0.03, f"{conc_vol:.2f} m³", ha='center', fontsize=8.5, weight='bold', color="#2D3748")
-        ax2_right.text(1, rebar_wt + (rebar_wt or 1.0) * 0.03, f"{rebar_wt:.2f} MT", ha='center', fontsize=8.5, weight='bold', color=HEX_PRIMARY_DARK)
-
-        ax2_left.grid(True, linestyle='--', alpha=0.6, axis='y')
-        ax2_right.grid(False)
-
+        plt.subplots_adjust(wspace=0.32)
         plt.tight_layout()
         path2 = os.path.join(output_dir, "concrete_rebar_comparison.png")
         plt.savefig(path2, dpi=300, bbox_inches='tight')

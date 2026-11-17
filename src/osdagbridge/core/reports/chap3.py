@@ -266,8 +266,8 @@ def ch3_loads(input_dict):
     # Table Header Templates via styles.make_longtable_header
     hdr_2col = make_longtable_header(r"\textbf{parameter} & \textbf{value} \\", 2)
     hdr_vll = make_longtable_header(
-        r"\multirow{2}{*}{\textbf{Vehicle}} & \multirow{2}{*}{\makecell{\textbf{Total Load}\\\textbf{(kN)}}} & \multirow{2}{*}{\makecell{\textbf{Impact}\\\textbf{Factor}}} & \multicolumn{3}{c|}{\textbf{Braking Load}} & \multirow{2}{*}{\makecell{\textbf{Centrifugal}\\\textbf{Force (kN)}}} \\ \cline{4-6}" + "\n"
-        + r"& & & \textbf{Considered?} & \makecell{\textbf{Value}\\\textbf{(kN)}} & \makecell{\textbf{Eccentricity}\\\textbf{(m)}} & \\",
+        r"\multirow{2}{*}{\textbf{Vehicle}} & \multirow{2}{*}{\makecell{\textbf{Total}\\\textbf{Load}\\\textbf{(kN)}}} & \multirow{2}{*}{\makecell{\textbf{Impact}\\\textbf{Factor}}} & \multicolumn{3}{c|}{\textbf{Braking Load}} & \multirow{2}{*}{\makecell{\textbf{Centrifugal}\\\textbf{Force}\\\textbf{(kN)}}} \\ \cline{4-6}" + "\n"
+        + r"& & & \makecell{\textbf{Consi-}\\\textbf{dered?}} & \makecell{\textbf{Value}\\\textbf{(kN)}} & \makecell{\textbf{Eccentr-}\\\textbf{icity (m)}} & \\",
         7
     )
     hdr_comb = make_longtable_header(r"\textbf{Combination ID} & \textbf{Load Cases} \\[6pt]", 2)
@@ -304,11 +304,14 @@ This section summarizes all loads applied to the bridge and the load combination
 \end{longtable}
 
 \newpage
-\begin{longtable}{|L{2.8cm}|C{1.8cm}|C{1.6cm}|C{1.8cm}|C{2.0cm}|C{2.0cm}|C{2.4cm}|}
+\begingroup
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{|L{2.8cm}|C{1.7cm}|C{1.6cm}|C{2.1cm}|C{1.6cm}|C{2.3cm}|C{2.5cm}|}
 \caption{\textbf{Vehicle Live Loads (LL) Parameters}} \\
 """ + hdr_vll + r"""
 """ + vehicle_rows_tex + r"""
 \end{longtable}
+\endgroup
 \par\vspace{-0.2cm}\noindent{\footnotesize \textit{Note: Braking forces calculated per IRC 6:2017 Cl. 211.2. Centrifugal force is 0.00 kN for straight bridge alignment (IRC 6 Cl. 212).}}\vspace{0.8em}
 
 \vspace{1em}

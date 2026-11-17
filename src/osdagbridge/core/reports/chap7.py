@@ -21,16 +21,16 @@ def ch7_quantities(input_dict, fig_paths=None):
 """
         if steel_fig and rebar_fig:
             fig_markup += r"""
-\begin{subfigure}[b]{0.48\textwidth}
+\begin{subfigure}[b]{0.92\textwidth}
     \centering
     \includegraphics[width=\textwidth]{""" + steel_fig + r"""}
-    \caption{Structural Steel Tonnage Breakdown}
+    \caption{Structural Steel Tonnage Breakdown by Component}
 \end{subfigure}
-\hfill
-\begin{subfigure}[b]{0.48\textwidth}
+\vspace{1.2em}
+\begin{subfigure}[b]{0.92\textwidth}
     \centering
     \includegraphics[width=\textwidth]{""" + rebar_fig + r"""}
-    \caption{Concrete Volume vs. Rebar Weight}
+    \caption{Concrete Deck Volume and Reinforcement Steel Weight}
 \end{subfigure}
 \caption{\textbf{Material Quantity Distributions}}
 """

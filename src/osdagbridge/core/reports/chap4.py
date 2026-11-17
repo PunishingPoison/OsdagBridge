@@ -113,7 +113,7 @@ A grillage model was used for structural analysis. The deck is idealized as a gr
 \setlength{\tabcolsep}{3pt}
 \renewcommand{\arraystretch}{1.25}
 
-""" + NEEDSPACE_TABLE + r"""
+\clearpage
 \begin{longtable}{|
 >{\centering\arraybackslash}p{3.1cm}|
 >{\centering\arraybackslash}p{1.7cm}|
@@ -144,6 +144,7 @@ A grillage model was used for structural analysis. The deck is idealized as a gr
 \hline
 \endfirsthead
 
+\multicolumn{9}{c}{\small\bfseries \tablename\ \thetable{} -- continued from previous page} \\[6pt]
 \hline
 \multirow{2}{*}{\makecell{\textbf{Load}\\\textbf{Case/}\\\textbf{Comb.}}}
 & \multicolumn{3}{c|}{\textbf{Bending Moment}}

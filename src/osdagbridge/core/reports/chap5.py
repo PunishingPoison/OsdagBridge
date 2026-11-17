@@ -1259,7 +1259,7 @@ Fatigue Shear Resistance, $Q_r$ & IRC 22 Table 8 ($\phi d$, $N_{sc}$) & """
     ur_fig_markup = ""
     if ur_fig:
         ur_fig_markup = r"""
-\vspace{1.5em}
+\clearpage
 \noindent\textbf{Utilization Ratio Visualizations}
 
 \begin{figure}[H]
@@ -1295,7 +1295,7 @@ This section presents all structural design checks performed by OsdagBridge. For
 \end{longtable}
 \noindent\textit{Note: IS 800:2007 Table 2}
 
-\vspace{1em}
+\clearpage
 """ + NEEDSPACE_TABLE + r"""
 \begin{longtable}{|C{2.5cm}|C{3.5cm}|C{3.5cm}|>{\centering\arraybackslash}p{4.2cm}|C{1.8cm}|}
 \caption{\textbf{Moment Capacity Check}} \\
@@ -1304,7 +1304,7 @@ This section presents all structural design checks performed by OsdagBridge. For
 \end{longtable}
 \noindent\textit{Note: IRC 22:2015 Cl. 603.3.1, IS 800:2007 Cl. 8.2.1. Maximum applied sagging moment across the bridge is $694.47\text{ kN}\cdot\text{m}$ on exterior girders G1 and G3 (due to eccentric vehicular live load), with flexural UR = 0.16 (PASS), matching Chapter 4 (Table 4.1, Figure 4.1 Bending Moment Envelope) and Table 5.29.}
 
-\vspace{1em}
+\clearpage
 """ + NEEDSPACE_TABLE + r"""
 \begin{longtable}{|C{2.5cm}|C{3.5cm}|C{3.5cm}|>{\centering\arraybackslash}p{4.2cm}|C{1.8cm}|}
 \caption{\textbf{Shear Capacity Check}} \\
@@ -1313,7 +1313,7 @@ This section presents all structural design checks performed by OsdagBridge. For
 \end{longtable}
 \noindent\textit{Note: IS 800:2007 Cl. 8.4, IRC 22:2015 Cl. 603.3.3.2. Maximum applied shear across the bridge is $160.38\text{ kN}$ on interior girder G2 (due to larger deck tributary width at supports), with governing shear UR = 0.29 (PASS), matching Chapter 4 (Table 4.1, Figure 4.2 Shear Force Envelope) and Table 5.29. Exterior girders G1 and G3 carry $130.46\text{ kN}$ (UR = 0.24).}
 
-\vspace{1em}
+\clearpage
 """ + NEEDSPACE_TABLE + r"""
 \begin{longtable}{|C{2.5cm}|C{3.5cm}|C{3.5cm}|>{\centering\arraybackslash}p{4.2cm}|C{1.8cm}|}
 \caption{\textbf{Interaction Checks (M-V and M-N)}} \\
@@ -1322,7 +1322,7 @@ This section presents all structural design checks performed by OsdagBridge. For
 \end{longtable}
 \noindent\textit{Note: IRC 22 Cl. 603.3.3.3}
 
-\vspace{1em}
+\clearpage
 """ + NEEDSPACE_TABLE + r"""
 \begin{longtable}{|C{2.5cm}|C{3.5cm}|C{3.5cm}|>{\centering\arraybackslash}p{4.2cm}|C{1.8cm}|}
 \caption{\textbf{Lateral Torsional Buckling Check -- Construction Stage}} \\
@@ -1331,7 +1331,7 @@ This section presents all structural design checks performed by OsdagBridge. For
 \end{longtable}
 \noindent\textit{Note: IRC 22 Cl. 603.3.3.1, IS 800 Cl. 8.2.2}
 
-\vspace{1em}
+\clearpage
 """ + NEEDSPACE_TABLE + r"""
 \begin{longtable}{|C{2.5cm}|L{6.5cm}|>{\arraybackslash}p{6.5cm}|}
 \caption{\textbf{Stiffener Design Summary}} \\
@@ -1359,7 +1359,7 @@ This section presents all structural design checks performed by OsdagBridge. For
 \end{itemize}
 \end{enumerate}
 
-\vspace{1em}
+\clearpage
 """ + NEEDSPACE_TABLE + r"""
 \begin{longtable}{|C{2.5cm}|L{3.5cm}|C{3.5cm}|>{\centering\arraybackslash}p{3.5cm}|C{2.5cm}|}
 \caption{\textbf{Serviceability -- Deflection Checks}} \\
@@ -1385,8 +1385,7 @@ This section presents all structural design checks performed by OsdagBridge. For
 \end{longtable}
 \noindent\textit{Note: IRC 22 Cl. 605 --- governing of normal and shear fatigue (worst by DCR). Capacity reduction factor $\mu_r$ applied where plate thickness > 25 mm.}
 
-\vspace{1em}
-\vspace{0.4em}
+\clearpage
 """ + NEEDSPACE_TABLE + r"""
 \begin{longtable}{|C{1.6cm}|>{\centering\arraybackslash}p{3.6cm}|C{2.4cm}|C{2.0cm}|C{2.1cm}|C{1.7cm}|C{1.5cm}|}
 \caption{\textbf{Girder Design Summary (DCR / Utilization Ratio)}} \\
@@ -1395,7 +1394,7 @@ This section presents all structural design checks performed by OsdagBridge. For
 \end{longtable}
 \noindent\textit{Note: UR = Demand / Capacity. A value $\leq 1.0$ indicates a passing check. The controlling check is the criterion with the highest UR for each girder, with the real load case/combination that drives it.}
 
-\vspace{1em}
+\clearpage
 """ + NEEDSPACE_TABLE + r"""
 \begin{longtable}{|L{3.6cm}|C{5.6cm}|>{\centering\arraybackslash}p{2.6cm}|L{3.0cm}|}
 \caption{\textbf{Shear Connector Capacity}} \\
@@ -1415,7 +1414,7 @@ This section presents all structural design checks performed by OsdagBridge. For
 \end{longtable}
 \noindent\textit{Note: IRC 22 Cl. 606.4, 606.9. Governing spacing $= \min(S_{L1}, S_{L2}, S_R)$.}
 
-\vspace{1em}
+\clearpage
 """ + NEEDSPACE_TABLE + r"""
 \begin{longtable}{|L{5.3cm}|>{\arraybackslash}p{7.2cm}|C{2.0cm}|}
 \caption{\textbf{Transverse Shear and Detailing Checks}} \\
@@ -1598,8 +1597,7 @@ Clear Cover (IRC 112 Cl. 15.2) & $\geq$ """ + _dkf(KEY_DD_MIN_COVER, nd=0) + r""
 
 Cross bracing between adjacent plate girders provides lateral stability during construction, resists transverse loads (wind, seismic, braking) in service, and prevents lateral torsional buckling of the girders. Members are designed per IS~800:2007 Cl.~7 (compression) and Cl.~6 (tension). Forces are derived from the grillage model under the governing seismic load combinations 1.5 EQ (b) and 1.5 EQ (a).
 
-\vspace{1em}
-\vspace{0.4em}
+\clearpage
 \noindent
 \setlength{\tabcolsep}{4pt}
 \setlength\LTleft{0pt}
@@ -1630,6 +1628,7 @@ Cross bracing between adjacent plate girders provides lateral stability during c
 \end{longtable}
 \noindent\textit{Note: Designed per IS 800 Cl. 7 (compression) and Cl. 6 (tension). OsdagBridge cross-bracing module used.}
 
+\clearpage
 % ===========================
 \section{End Diaphragm Design}
 \label{sec:end-diaphragm}
@@ -1638,7 +1637,6 @@ Cross bracing between adjacent plate girders provides lateral stability during c
 End diaphragms at the supports transfer transverse loads to the bearings, restrain the bottom flanges against lateral displacement, and maintain the girder cross-section geometry during construction and in service. They are designed per IS~800:2007 and IRC~24:2010 Cl.~507.
 
 \vspace{1em}
-\vspace{0.4em}
 \noindent
 \setlength{\tabcolsep}{4pt}
 \setlength{\LTleft}{0pt}
@@ -1669,6 +1667,7 @@ End diaphragms at the supports transfer transverse loads to the bearings, restra
 \end{longtable}
 \noindent\textit{Note: Designed per IS 800 Cl. 7 (compression) and Cl. 6 (tension) at support locations. OsdagBridge cross-bracing module used.}
 
+\clearpage
 % ===========================
 \section{Overall Design Check Summary}
 \label{sec:overall-summary}
