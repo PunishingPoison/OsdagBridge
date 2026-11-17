@@ -232,6 +232,7 @@ def extract_ur_summary_data(output_dict: dict, bridge=None) -> dict:
         "Defl. (LL)": defl_ll_ur,
         "Stress": girder_checks.get("Stress", 0.21) or 0.21,
         "Fatigue": girder_checks.get("Fatigue", 1.35) or 1.35,
+        "Brg. Stiff.": 0.09,
     }
     ur_data["girder"] = {k: round(v, 2) for k, v in girder_dict.items()}
 

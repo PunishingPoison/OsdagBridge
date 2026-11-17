@@ -2400,11 +2400,15 @@ class DCREngine:
                            "fcd_bs_MPa", "KL_r_bs"):
                     if key not in bs_det:
                         raise KeyError(f"'{key}' missing from bearing_stiffener details.")
-                # Cl.509.7.3.1 — web buckling (PASS = stiffener not needed; FAIL = stiffener needed)
-                self._add_check(21, "Brg.Stiff: Web Buckling", "Cl.509.7.3.1",
-                                 R, bs_det["Fcdw_wb_kN"], "kN",
-                                 note=(f"fcc={bs_det['fcc_wb_MPa']:.2f} MPa, "
-                                       f"A=(b1+n1)·tw={bs_det['A_wb_mm2']:.0f} mm²"))
+                # Cl.509.7.3.1 / IS 800 Cl.8.7.3.1 & Cl.8.7.1.5 — Bearing Stiffener Web Buckling
+                # IS 800 Cl.8.7.3.1 evaluates unstiffened web capacity Fcdw to determine if
+                # bearing stiffeners are mandatory (R > Fcdw). When bearing stiffeners are provided,
+                # the stiffened web assembly acts as a cruciform column with capacity Fcd per
+                # Cl.509.7.2.5 / IS 800 Cl.8.7.1.5. Thus, the stiffened assembly governs stability.
+                self._add_check(21, "Brg.Stiff: Web Buckling", "Cl.509.7.2.5",
+                                 R, bs_det["Fcd_kN"], "kN",
+                                 note=(f"Unstiffened Fcdw={bs_det['Fcdw_wb_kN']:.2f} kN < R → Stiffeners provided; "
+                                       f"Stiffened column Fcd={bs_det['Fcd_kN']:.2f} kN (IS 800 Cl.8.7.1.5)"))
                 # Cl.509.7.3.2 — local crushing
                 self._add_check(21, "Brg.Stiff: Local Crushing", "Cl.509.7.3.2",
                                  R, bs_det["Fcdw_lc_kN"], "kN",
@@ -3122,7 +3126,13 @@ def _compute_per_lc_dcr(
     # utilization ratios for all 8 checks per LC / girder combination.
     result: Dict[str, dict] = {}
     for lc_name, lc_d in g_lc.items():
-        lc_cap = IRC22CapacityCalculator(config).compute_all(
+        lc_cfg = config
+        if config and config.stiffener and config.stiffener.bs_R_kN > 0:
+            import copy
+            lc_cfg = copy.copy(config)
+            lc_cfg.stiffener = copy.copy(config.stiffener)
+            lc_cfg.stiffener.bs_R_kN = lc_d.Vu_kN
+        lc_cap = IRC22CapacityCalculator(lc_cfg).compute_all(
             Vu_kN=lc_d.Vu_kN,
             stress_range_MPa=lc_d.stress_range_MPa,
             M_sls_kNm=lc_d.M_sls_kNm,
@@ -3284,7 +3294,7 @@ def run_design_check(
                 )
                 if g_config.stiffener is None:
                     g_config.stiffener = StiffenerConfig()
-                g_config.stiffener.bs_R_kN = config.stiffener.bs_R_kN
+                g_config.stiffener.bs_R_kN = g_demand.Vu_kN
             except Exception:
                 g_config = config
         else:

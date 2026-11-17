@@ -103,23 +103,46 @@ IS 2062 & 2011 & Structural steel - yield and ultimate strength by grade \\
 \section{Analysis and Design Assumptions of This Version}
 \label{sec:assumptions}
 
-\textbf{Structural Analysis}
+This section details the primary engineering assumptions adopted in the structural analysis and design models of OsdagBridge, providing their technical justifications, affected design checks, sensitivity evaluations, and verification thresholds per IRC and IS bridge codes.
 
+\subsection{1. Simply Supported Boundary Conditions}
 \begin{itemize}
-    \item All girders are modelled as simply supported; continuous spans are not currently supported.
-    \item A 3D grillage model (OSPGrillage) is used for load distribution. Grillage members carry composite section properties after the construction stage.
-    \item The transverse member forces are computed using an approximate 2D frame analogy. For irregular or skewed geometries, a 3D FEM is recommended.
-    \item Fixed bearing stiffness is modelled as $k = 1{,}000{,}000 \,\text{kN/m}$ (virtually rigid); free/expansion bearing as $k = 100 \, \text{kN/m}$.
-    \item Construction stage sequence analysis is approximate. Detailed staged analysis should be performed for long-term deflection checks.
+    \item \textbf{Technical Justification:} Standard medium-span composite highway bridges (up to 30~m) in India are conventionally configured as simply supported spans resting on elastomeric or POT/PTFE bearings. This prevents moment transfer across pier supports, accommodates thermal breathing without inducing secondary stresses, and simplifies substructure design.
+    \item \textbf{Design Checks Affected:} Maximum positive bending moment at midspan ($M_u$), end support reactions and vertical shear ($V_u$), and midspan deflections ($\delta_{live}$, $\delta_{total}$).
+    \item \textbf{Sensitivity:} Moderate to high. Rotational restraint at bearings (e.g., seized bearings) would induce negative hogging moments at ends and reduce midspan sagging moments.
+    \item \textbf{Verification Recommendations:} For continuous spans, integral abutments, or spans with elastomeric bearings providing partial rotational stiffness, a continuous grillage or 3D FEM should be utilized.
 \end{itemize}
 
-\textbf{Composite Action}
-
+\subsection{2. Construction Stage Sequence and Long-Term Creep/Shrinkage}
 \begin{itemize}
-    \item Full shear connection is assumed at ULS with headed stud connectors designed per IRC 22:2015 Cl.606.
-    \item Short-term composite section properties (modular ratio $n = E_s/E_{cm}$) are used for ULS checks.
-    \item Long-term composite section properties (with creep-adjusted modular ratio) are used for SLS deflection and crack-width checks.
-    \item Pre-composite stage: the steel girder alone resists all construction loads prior to concrete gaining strength.
+    \item \textbf{Technical Justification:} Prior to the concrete deck curing and achieving its 28-day design compressive strength ($f_{ck}$), the bare steel girder must independently support its self-weight, the wet concrete deck, formwork, and construction loads. After hardening, all subsequent dead loads (wearing course, crash barriers) and live loads act on the composite section. Creep is accounted for using an effective modular ratio ($m = 2n$ or $3n$) per IRC 22:2015 Cl.~604.2.
+    \item \textbf{Design Checks Affected:} Lateral torsional buckling of bare steel girder (IS 800 Cl.~8.2.2 / IRC 24 Cl.~509.4), construction stage stresses, SLS long-term deflection (L/600 limit per IRC 22 Cl.~604.3.2), and SLS concrete/steel stress limitations (IRC 22 Cl.~604.3.1).
+    \item \textbf{Sensitivity:} High. The long-term total deflection is particularly sensitive to the creep coefficient ($\phi = 2.0$--$2.5$) and casting sequence (unpropped vs. propped construction).
+    \item \textbf{Verification Recommendations:} Detailed time-dependent staged erection analysis is recommended for spans $\ge 25$~m or when staged deck slab casting is specified in the construction sequence.
+\end{itemize}
+
+\subsection{3. Full Shear Connection Assumption at ULS}
+\begin{itemize}
+    \item \textbf{Technical Justification:} IRC 22:2015 Cl.~606.3 mandates that highway bridge girders provide full shear connection between the steel top flange and concrete slab so that the plastic or elastic flexural capacity of the composite girder can be fully mobilized without interfacial slip. Headed stud shear connectors are provided at pitches satisfying both interface shear capacity and maximum spacing limits ($s \le 3 t_{slab} \le 600$~mm).
+    \item \textbf{Design Checks Affected:} Composite moment capacity ($M_d$), neutral axis depth ($x_u$), longitudinal shear at the steel-concrete interface, and flexural stiffness governing deflections.
+    \item \textbf{Sensitivity:} Low for flexure as long as stud pitch is rigorously checked ($UR \le 1.0$), but high for fatigue and serviceability slip if studs are under-designed.
+    \item \textbf{Verification Recommendations:} Partial shear connection is prohibited for bridge structures per IRC 22. In-situ push-out tests or FE interface modelling should be considered only when non-standard connector configurations are employed.
+\end{itemize}
+
+\subsection{4. Bearing Stiffness Idealization ($k = 10^6\text{ kN/m}$ vs $100\text{ kN/m}$)}
+\begin{itemize}
+    \item \textbf{Technical Justification:} Fixed bearings are idealized with high translation stiffness ($k_x = 10^6\text{ kN/m}$) to represent restrained longitudinal/transverse movement, while expansion (free) bearings are modelled with nominal stiffness ($k = 100\text{ kN/m}$) to avoid numerical singularity in grillage analysis while allowing uninhibited thermal expansion and contraction.
+    \item \textbf{Design Checks Affected:} Longitudinal horizontal braking forces (IRC 6 Cl.~211), seismic inertial base shear distribution (IRC SP 114), and temperature-induced expansion reactions.
+    \item \textbf{Sensitivity:} Low for vertical girder design; moderate for substructure and bearing selection.
+    \item \textbf{Verification Recommendations:} Exact bearing stiffness matrices (incorporating elastomer shear modulus $G$ and shape factor $S$) should be verified during bearing design per IRC 83 (Part II/Part III).
+\end{itemize}
+
+\subsection{5. Transverse Member Forces via 2D Frame Analogy}
+\begin{itemize}
+    \item \textbf{Technical Justification:} In grillage analysis, transverse deck elements represent tributary strips of the concrete slab and intermediate cross frames. The 2D transverse frame analogy isolates transverse slices of the superstructure under wheel loads, kerb loads, and wind/seismic overturning to estimate transverse bending moments, shear forces, and cross-bracing axial forces.
+    \item \textbf{Design Checks Affected:} Deck slab sagging and hogging flexure, slab shear capacity, cross-bracing diagonal and chord axial forces, and end diaphragm reaction transfer.
+    \item \textbf{Sensitivity:} Moderate for straight, right-angled bridges with uniform girder spacing; high for bridges with skew angles $> 15^\circ$ or curved alignments.
+    \item \textbf{Verification Recommendations:} For skew angles $> 15^\circ$, bifurcated structures, or highly asymmetric carriageways, full 3D plate-and-shell finite element analysis (FEA) must be carried out per IRC 24 Cl.~504.8.
 \end{itemize}
 """
     ]

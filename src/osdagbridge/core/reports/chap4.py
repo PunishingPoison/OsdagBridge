@@ -176,7 +176,7 @@ A grillage model was used for structural analysis. The deck is idealized as a gr
 \endgroup
 
 \vspace{0.4em}
-\noindent\textit{Note: Peak ULS design demands across the bridge: Maximum sagging bending moment $M_{u,max} = 694.47\text{ kN}\cdot\text{m}$ occurs on exterior girder G1 at midspan ($x = 10.0\text{ m}$); maximum shear force $V_{u,max} = 160.38\text{ kN}$ occurs on interior girder G2 at support ($x = 0.0\text{ m}$) due to larger tributary width. Both governing demands form the basis of the girder capacity checks in Chapter 5.}
+\noindent\textit{Note: Peak ULS design demands across the bridge: Maximum sagging bending moment $M_{u,max} = 694.47\text{ kN}\cdot\text{m}$ occurs on exterior girder G1 at midspan ($x = 10.0\text{ m}$) under Envelope ULS. Maximum shear force across all girders is $V_{u,max} = 160.38\text{ kN}$ which occurs on interior girder G2 at support ($x = 0.0\text{ m}$) under governing combination ACCIDENTAL 1 (1.0 DL + 1.0 DW + 0.75 LL) due to its larger tributary carriageway width; exterior girders G1 and G3 experience a maximum shear force of $130.46\text{ kN}$ at support governed by seismic combination 1.5 EQ (b). These girder-specific governing shears form the basis of the shear checks in Table 5.4 and bearing stiffener checks in Table 5.8.}
 
 \vspace{1em}
 """ + NEEDSPACE_TABLE + r"""

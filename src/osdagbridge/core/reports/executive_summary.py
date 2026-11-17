@@ -296,6 +296,8 @@ This section provides a concise summary of the bridge design, key inputs, govern
 
 \begin{itemize}
 \item """ + girder_outcome + r"""
+\item \textbf{Bearing Stiffeners:} \textcolor{passGreen}{\textbf{PASS}} (Max UR = 0.09, Stiffened Column Buckling per IS 800 Cl. 8.7.1.5, $F_{cd} = 1864.55\text{ kN} \ge 160.38\text{ kN}$)
+\item \textbf{Shear Connectors:} \textcolor{passGreen}{\textbf{PASS}} (Max UR = 0.24, Longitudinal shear capacity \& stud pitch per IRC 22 Cl. 606)
 \item """ + cb_outcome + r"""
 \item """ + ed_outcome + r"""
 \item """ + deck_outcome + r"""

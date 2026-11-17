@@ -365,9 +365,13 @@ This section summarizes all loads applied to the bridge and the load combination
 \hline
 \textnormal{Minimum Shade Temperature} & """ + _tex(t_min_shade) + r""" $^\circ$C \\[6pt]
 \hline
-\textnormal{Effective Bridge Temp. Range} & """ + _tex(t_brg_min) + r""" to """ + _tex(t_brg_max) + r""" $^\circ$C \\[6pt]
+\textnormal{Effective Bridge Temp. Range} & """ + _tex(t_brg_min) + r""" to """ + _tex(t_brg_max) + r""" $^\circ$C (Mean $T_0 = 32.5^\circ$C) \\[6pt]
 \hline
-\textnormal{Temperature Rise / Fall for Design} & +""" + _tex(t_rise) + r""" $^\circ$C / \textminus{}""" + _tex(t_fall) + r""" $^\circ$C \\[6pt]
+\textnormal{Uniform Temperature Rise ($+\Delta T_R$)} & +""" + _tex(t_rise) + r""" $^\circ$C \\[6pt]
+\hline
+\textnormal{Uniform Temperature Fall ($-\Delta T_F$)} & $-$""" + _tex(t_fall) + r""" $^\circ$C \\[6pt]
+\hline
+\textnormal{Temperature Differential} & Per IRC 6:2017 Fig. 9 (Positive \& Reverse Temp. Difference) \\[6pt]
 \hline
 \end{longtable}
 
