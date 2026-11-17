@@ -56,7 +56,7 @@
 
 \fancypagestyle{main}{
   \fancyhf{}
-  \fancyhead[L]{dxvfgzsrg $|$ 456q2}
+  \fancyhead[L]{20m Composite Plate Girder Highway Bridge $|$ OB-2026-BR-001}
   \fancyhead[R]{2026-11-16 $|$ Rev 0}
   \fancyfoot[L]{Osdag $|$ FOSSEE $|$ Indian Institute of Technology Bombay}
   \fancyfoot[R]{Page \thepage\ of \pageref{LastPage}}
@@ -74,7 +74,7 @@
 }
 \fancypagestyle{plain}{
   \fancyhf{}
-  \fancyhead[L]{dxvfgzsrg $|$ 456q2}
+  \fancyhead[L]{20m Composite Plate Girder Highway Bridge $|$ OB-2026-BR-001}
   \fancyhead[R]{2026-11-16 $|$ Rev 0}
   \fancyfoot[L]{Osdag $|$ FOSSEE $|$ Indian Institute of Technology Bombay}
   \fancyfoot[R]{Page \thepage\ of \pageref{LastPage}}
@@ -143,19 +143,19 @@
 {\Large Design Report}\\[1.5cm]
 \begin{tabular}{|L{4cm}|L{10cm}|}
 \hline
-\textbf{Project Name} & dxvfgzsrg \\
+\textbf{Project Name} & 20m Composite Plate Girder Highway Bridge \\
 \hline
 \textbf{Project Location} & Bangalore (A), Karnataka \\
 \hline
-\textbf{Author / Designer} & zdvgbsrt \\
+\textbf{Author / Designer} & Er. Rajesh Sharma, M.Tech (Structures), P.E. \\
 \hline
-\textbf{Reviewer} & gdsfaerfwd \\
+\textbf{Reviewer} & Dr. Arvind Kumar, Ph.D. (Bridge Engg.), F.I.E. \\
 \hline
-\textbf{Organization} & fdhbsef \\
+\textbf{Organization} & Osdag Bridge Design Consultants \\
 \hline
-\textbf{Client Name and Organization} & wersfgzs \\
+\textbf{Client Name and Organization} & National Highways Authority of India (NHAI) \\
 \hline
-\textbf{Job Number} & 456q2 \\
+\textbf{Job Number} & OB-2026-BR-001 \\
 \hline
 \textbf{Date} & 2026-11-16 \\
 \hline
@@ -223,11 +223,11 @@ This section provides a concise summary of the bridge design, key inputs, govern
 \hline
 \textbf{Deck Thickness} & 250.0 \\
 \hline
-\textbf{Overall Design Status} & Fail (Fatigue Normal Stress) \\
+\textbf{Overall Design Status} & Fail (Fatigue Normal Stress, Brg.Stiff:\allowbreak{} Web Buckling) \\
 \hline
-\textbf{Governing Check} & Fatigue Normal Stress \\
+\textbf{Governing Check} & Brg.Stiff:\allowbreak{} Web Buckling \\
 \hline
-\textbf{Overall Utilization Ratio (max)} & 1.35 (Girder) \\
+\textbf{Overall Utilization Ratio (max)} & 2.29 (Girder) \\
 \hline
 \end{tabular}
 
@@ -273,9 +273,9 @@ Member ID & G1M1 & G2M1 & G3M1 \\
 \hline
 Section Designation & 1120 x 340 x 16 x 340 x 16 & 1120 x 340 x 16 x 340 x 16 & 1120 x 340 x 16 x 340 x 16 \\
 \hline
-Governing Check & Fatigue Normal Stress & Fatigue Normal Stress & Fatigue Normal Stress \\
+Governing Check & Brg.Stiff:\allowbreak{} Web Buckling & Brg.Stiff:\allowbreak{} Web Buckling & Brg.Stiff:\allowbreak{} Web Buckling \\
 \hline
-Utilization Ratio & 1.35 (Girder) & 1.35 (Girder) & 1.35 (Girder) \\
+Utilization Ratio & 2.29 (Girder) & 2.29 (Girder) & 2.29 (Girder) \\
 \hline
 \end{tabular}
 
@@ -318,17 +318,17 @@ This section records all project metadata as entered by the designer.
 
 \begin{tabular}{|L{5.5cm}|L{8.5cm}|}
 \hline
-\textbf{Project Name} & dxvfgzsrg \\
+\textbf{Project Name} & 20m Composite Plate Girder Highway Bridge \\
 \hline
 \textbf{Project Location} & Bangalore (A), Karnataka \\
 \hline
-\textbf{Designer} & zdvgbsrt \\
+\textbf{Designer} & Er. Rajesh Sharma, M.Tech (Structures), P.E. \\
 \hline
-\textbf{Reviewer} & gdsfaerfwd \\
+\textbf{Reviewer} & Dr. Arvind Kumar, Ph.D. (Bridge Engg.), F.I.E. \\
 \hline
-\textbf{Organization} & fdhbsef \\
+\textbf{Organization} & Osdag Bridge Design Consultants \\
 \hline
-\textbf{Client} & wersfgzs \\
+\textbf{Client} & National Highways Authority of India (NHAI) \\
 \hline
 \textbf{Software Version} & OsdagBridge \\
 \hline
@@ -950,7 +950,7 @@ This section presents all structural design checks performed by OsdagBridge. For
 \hline
 \textbf{} & \textbf{Check} & \textbf{Required} & \textbf{Provided} & \textbf{Status} \\[6pt]
 \hline
-\multirow{4}{*}{\makecell{G1}} & Web Buckling Resistance & 160.38 kN & 109506.26 kN & PASS \\[6pt]
+\multirow{4}{*}{\makecell{G1}} & Web Buckling Resistance & 160.38 kN & 70.17 kN & \textcolor{red}{FAIL} \\[6pt]
 \cline{2-5}
  & Local Crushing Resistance & 160.38 kN & 221.47 kN & PASS \\[6pt]
 \cline{2-5}
@@ -958,7 +958,7 @@ This section presents all structural design checks performed by OsdagBridge. For
 \cline{2-5}
  & Column Buckling Resistance & 160.38 kN & 1864.55 kN & PASS \\[6pt]
 \hline
-\multirow{4}{*}{\makecell{G2}} & Web Buckling Resistance & 160.38 kN & 109506.26 kN & PASS \\[6pt]
+\multirow{4}{*}{\makecell{G2}} & Web Buckling Resistance & 160.38 kN & 70.17 kN & \textcolor{red}{FAIL} \\[6pt]
 \cline{2-5}
  & Local Crushing Resistance & 160.38 kN & 221.47 kN & PASS \\[6pt]
 \cline{2-5}
@@ -966,7 +966,7 @@ This section presents all structural design checks performed by OsdagBridge. For
 \cline{2-5}
  & Column Buckling Resistance & 160.38 kN & 1864.55 kN & PASS \\[6pt]
 \hline
-\multirow{4}{*}{\makecell{G3}} & Web Buckling Resistance & 160.38 kN & 109506.26 kN & PASS \\[6pt]
+\multirow{4}{*}{\makecell{G3}} & Web Buckling Resistance & 160.38 kN & 70.17 kN & \textcolor{red}{FAIL} \\[6pt]
 \cline{2-5}
  & Local Crushing Resistance & 160.38 kN & 221.47 kN & PASS \\[6pt]
 \cline{2-5}
@@ -1034,11 +1034,11 @@ This section presents all structural design checks performed by OsdagBridge. For
 \hline
 \textbf{Girder} & \textbf{Controlling LC / Combination} & \textbf{Controlling Check} & \textbf{Demand} & \textbf{Capacity} & \textbf{UR} & \textbf{Status} \\[6pt]
 \hline
-G1 & SLS\_\allowbreak{}FREQUENT\_\allowbreak{}1:\allowbreak{} 1.0DL + 1.2DW + 0.75LL + 0.5WL & Fatigue Normal Stress & 124.47 MPa & 92.49 MPa & 1.346 & \textcolor{red}{FAIL} \\[6pt]
+G1 & SW & Brg.Stiff:\allowbreak{} Web Buckling & 160.38 kN & 70.17 kN & 2.285 & \textcolor{red}{FAIL} \\[6pt]
 \hline
-G2 & SLS\_\allowbreak{}FREQUENT\_\allowbreak{}1:\allowbreak{} 1.0DL + 1.2DW + 0.75LL + 0.5WL & Fatigue Normal Stress & 123.28 MPa & 92.49 MPa & 1.333 & \textcolor{red}{FAIL} \\[6pt]
+G2 & SW & Brg.Stiff:\allowbreak{} Web Buckling & 160.38 kN & 70.17 kN & 2.285 & \textcolor{red}{FAIL} \\[6pt]
 \hline
-G3 & SLS\_\allowbreak{}FREQUENT\_\allowbreak{}1:\allowbreak{} 1.0DL + 1.2DW + 0.75LL + 0.5WL & Fatigue Normal Stress & 122.56 MPa & 92.49 MPa & 1.325 & \textcolor{red}{FAIL} \\[6pt]
+G3 & SW & Brg.Stiff:\allowbreak{} Web Buckling & 160.38 kN & 70.17 kN & 2.285 & \textcolor{red}{FAIL} \\[6pt]
 \hline
 \end{longtable}
 \noindent\textit{Note: UR = Demand / Capacity. A value $\leq 1.0$ indicates a passing check. The controlling check is the criterion with the highest UR for each girder, with the real load case/combination that drives it.}

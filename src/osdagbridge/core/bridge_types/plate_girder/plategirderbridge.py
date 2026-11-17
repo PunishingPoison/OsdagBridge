@@ -966,9 +966,12 @@ class PlateGirderBridge:
         return figure_paths
 
 
-    def generate_design_report(self, request, cad_generator, is_preview=False):
+    def generate_design_report(self, request, cad_generator, is_preview=False, is_baseline=False):
         """Compile the final PDF design report."""
-        from osdagbridge.core.reports.report_generator import build_report_payload, generate_report
+        if is_baseline or getattr(request, 'is_baseline', False):
+            from osdagbridge.core.reports_baseline.report_generator import build_report_payload, generate_report
+        else:
+            from osdagbridge.core.reports.report_generator import build_report_payload, generate_report
 
         report_inputs = self.input_dict.copy()
         output_dict   = dict(self.output_dict)  # MappingProxyType → dict

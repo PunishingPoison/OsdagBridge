@@ -72,26 +72,47 @@ All six core requirements from the Scope of Work, along with all detailed review
 
 ## 3. Build, Verification & Execution Instructions
 
-### 3.1 CLI Command to Generate Enhanced Report
+### 3.1 CLI Commands to Generate Reports
+
+#### A. Generate Both Baseline and Enhanced Reports Together (Side-by-Side Comparison)
 ```cmd
 cd C:\Users\prath\Downloads\OsdagBridge
-C:\Users\prath\anaconda3\envs\osdagbridge-env\python.exe "C:\Users\prath\.gemini\antigravity\brain\110bad31-b60f-48ea-988b-4d93a7a4d407\scratch\generate_enhanced.py"
+C:\Users\prath\anaconda3\envs\osdagbridge-env\python.exe generate_both_reports.py
 ```
 
-### 3.2 Compilation Result
-- **Output PDF**: `C:\Users\prath\Downloads\OsdagBridge\Report_After.pdf` (62 pages, 2.71 MB).
-- **Source Code Archive**: `C:\Users\prath\Downloads\OsdagBridge\OsdagBridge_Report_Generator.zip` (78.3 KB).
-- **Compilation Status**: Exit code 0, clean 2-pass `pdflatex` compilation without errors or warnings.
+#### B. Generate Enhanced Report Alone (`Report_After.pdf` - 62 Pages)
+```cmd
+cd C:\Users\prath\Downloads\OsdagBridge
+C:\Users\prath\anaconda3\envs\osdagbridge-env\python.exe generate_enhanced.py
+```
+
+#### C. Generate Baseline Report Alone (`Report_Before.pdf` - 36 Pages)
+```cmd
+cd C:\Users\prath\Downloads\OsdagBridge
+C:\Users\prath\anaconda3\envs\osdagbridge-env\python.exe generate_baseline.py
+```
+
+### 3.2 Compilation Results Summary
+- **Baseline Deliverable**: `Report_Before.pdf` (36 pages, 343.8 KB) & `Report_Before.tex`. Recreates the exact default baseline state at initial software installation (`d74f56d`).
+- **Enhanced Deliverable**: `Report_After.pdf` (62 pages, 2.71 MB) & `Report_After.tex`. Implements all 6 Scope of Work requirements, repeated table headers, UR charts, material take-off breakdown, verified CAD drawings, and reconciled design checks.
+- **Source Code Archive**: `OsdagBridge_Report_Generator.zip` (189.1 KB).
+- **Compilation Status**: Both compile cleanly with exit code 0 under `pdflatex`.
 
 ---
 
 ## 4. Summary of Git Changes
 
-The following files have been modified and verified on branch `dev`:
+The following files have been added/modified and verified on branch `dev`:
+- `generate_both_reports.py`: Unified suite script generating both baseline and enhanced reports together.
+- `generate_baseline.py`: Standalone CLI runner generating `Report_Before.pdf` using the baseline reporting engine.
+- `generate_enhanced.py`: Standalone CLI runner generating `Report_After.pdf` using the enhanced reporting engine.
+- `src/osdagbridge/core/reports_baseline/`: Dedicated baseline reporting engine matching commit `d74f56d` for repeatable baseline reproduction.
+- `src/osdagbridge/core/bridge_types/plate_girder/plategirderbridge.py`: Added `is_baseline` routing in `generate_design_report()`.
 - `src/osdagbridge/core/boq/boq_generator.py`: Linked girder steel BOM take-off directly to designed section properties ($0.019584\text{ m}^2 \rightarrow 9.22\text{ MT}$).
 - `src/osdagbridge/core/bridge_types/plate_girder/designer.py`: Corrected web buckling radius of gyration formula to $t_w / \sqrt{12}$ with IS 800 curve c ($70.17\text{ kN}$).
 - `src/osdagbridge/core/reports/chap2.py`: Clarified bearing stiffener pair spacing ($100\text{ mm}$) and added explanatory engineering note below Table 2.8.
 - `src/osdagbridge/core/reports/chap5.py`: Reconciled Cross Bracing and End Diaphragm UR to exact Demand / Capacity ($0.075, 0.056, 0.048, 0.042$), created dedicated End Diaphragm tables, updated Table 5.29 analysis demand to $1.81\text{ kN}$, and set Girder Moment load combination to `Envelope ULS`.
-- `Report_After.pdf` & `Report_After.tex`: Updated 62-page production PDF and LaTeX source code.
-- `OsdagBridge_Report_Generator.zip`: Complete source bundle.
+- `Report_Before.pdf` & `Report_Before.tex`: Recompiled baseline report (36 pages) and LaTeX source.
+- `Report_After.pdf` & `Report_After.tex`: Recompiled enhanced report (62 pages) and LaTeX source.
+- `OsdagBridge_Report_Generator.zip`: Complete source bundle including both reporting engines.
 - `Technical_Changes.md`: Comprehensive engineering documentation.
