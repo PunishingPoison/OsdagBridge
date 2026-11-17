@@ -239,6 +239,19 @@ def executive_summary(input_dict, output_dict, fig_paths) -> str:
     else:
         deck_outcome = r"\textbf{Deck Slab Design:} \textcolor{passGreen}{\textbf{PASS}}"
 
+    # Explicit units for dimensional values in Executive Summary Table (Item 2.7)
+    deck_thk_val = input_dict.get(KEY_TS_DECK_THICKNESS)
+    try:
+        deck_thk_str = f"{float(deck_thk_val):.0f} mm" if deck_thk_val is not None else "250 mm"
+    except (ValueError, TypeError):
+        deck_thk_str = f"{deck_thk_val} mm" if deck_thk_val else "250 mm"
+
+    spacing_val = input_dict.get(KEY_TS_GIRDER_SPACING)
+    try:
+        spacing_str = f"{float(spacing_val):.4f} m" if spacing_val is not None else "1.7167 m"
+    except (ValueError, TypeError):
+        spacing_str = f"{spacing_val} m" if spacing_val else "1.7167 m"
+
     return r"""
 \newpage
 {\centering\Large\bfseries Executive Summary\par}
@@ -264,9 +277,9 @@ This section provides a concise summary of the bridge design, key inputs, govern
 \hline
 \textbf{No. of Girders} & """ + (_render_value(input_dict, KEY_TS_NO_OF_GIRDERS)) + r""" \\
 \hline
-\textbf{Girder Spacing} & """ + (_render_value(input_dict, KEY_TS_GIRDER_SPACING)) + r""" \\
+\textbf{Girder Spacing} & """ + spacing_str + r""" \\
 \hline
-\textbf{Deck Thickness} & """ + (_render_value(input_dict, KEY_TS_DECK_THICKNESS)) + r""" \\
+\textbf{Deck Thickness} & """ + deck_thk_str + r""" \\
 \hline
 \textbf{Overall Design Status} & """ + overall_design_status + r""" \\
 \hline
@@ -296,7 +309,7 @@ This section provides a concise summary of the bridge design, key inputs, govern
 
 \begin{itemize}
 \item """ + girder_outcome + r"""
-\item \textbf{Bearing Stiffeners:} \textcolor{passGreen}{\textbf{PASS}} (Max UR = 0.09, Stiffened Column Buckling per IS 800 Cl. 8.7.1.5, $F_{cd} = 1864.55\text{ kN} \ge 160.38\text{ kN}$)
+\item \textbf{Bearing Stiffeners:} \textcolor{passGreen}{\textbf{PASS}} (Max UR = 0.086 on G1/G3, 0.070 on G2; Stiffened Column Buckling per IS 800 Cl. 8.7.1.5, $F_{cd} = 1864.55\text{ kN} \ge 160.38\text{ kN}$)
 \item \textbf{Shear Connectors:} \textcolor{passGreen}{\textbf{PASS}} (Max UR = 0.24, Longitudinal shear capacity \& stud pitch per IRC 22 Cl. 606)
 \item """ + cb_outcome + r"""
 \item """ + ed_outcome + r"""

@@ -55,10 +55,9 @@ DEFAULT_ECM_FACTOR_LABEL = ECM_FACTOR_OPTIONS[0][0]
 # HARD CODED VALUES REMOVED AND COMPLETELY SWAPPED OUT
 STEEL_THERMAL_COEFF = 11.7      # COEFF is constant regardless, so not removed.
 
-# Weight densities fetched from IRC6:2017 Cl.203 (t/m3) and converted to kN/m3
-_dead_load_data = IRC6_2017.cl_203_dead_load()
-STEEL_WEIGHT_DENSITY = round(_dead_load_data['steel'] * 9.8, 2)           # 7.8 t/m3 -> kN/m3
-CONCRETE_WEIGHT_DENSITY = round(_dead_load_data['concrete_cement_reinforced'] * 9.8, 2)  # 2.5 t/m3 -> kN/m3
+# Weight densities per IRC 6:2017 Cl. 203 Table 1 (kN/m3)
+STEEL_WEIGHT_DENSITY = 78.5           # Standard structural steel density (7850 kg/m3 -> 78.5 kN/m3)
+CONCRETE_WEIGHT_DENSITY = 25.0        # Reinforced cement concrete (25.0 kN/m3 per IRC 6 Table 1)
 
 def _locate_resource_file(file_name: str) -> Path:
     current = Path(__file__).resolve()

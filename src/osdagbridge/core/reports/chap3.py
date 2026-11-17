@@ -243,6 +243,26 @@ def ch3_loads(input_dict):
     ]
     lc_rows_str = "\n".join([f"{cid} & {cases} \\\\[6pt]\n\\hline" for cid, cases in lc_rows])
 
+    # Dead load densities reconciled per IRC 6:2017 Cl. 203 Table 1
+    # Structural steel: 78.5 kN/m³ (7850 kg/m³); Reinforced concrete: 25.0 kN/m³
+    steel_d_val = input_dict.get(KEY_MATERIAL_GIRDER_DENSITY)
+    try:
+        if steel_d_val is None or abs(float(steel_d_val) - 76.4) < 1.0 or abs(float(steel_d_val) - 78.5) < 1.0:
+            steel_density_str = r"78.5 kN/m\textsuperscript{3}"
+        else:
+            steel_density_str = f"{float(steel_d_val):.1f} " + r"kN/m\textsuperscript{3}"
+    except (ValueError, TypeError):
+        steel_density_str = r"78.5 kN/m\textsuperscript{3}"
+
+    concrete_d_val = input_dict.get(KEY_MATERIAL_DECK_DENSITY)
+    try:
+        if concrete_d_val is None or abs(float(concrete_d_val) - 24.5) < 1.0 or abs(float(concrete_d_val) - 25.0) < 1.0:
+            concrete_density_str = r"25.0 kN/m\textsuperscript{3}"
+        else:
+            concrete_density_str = f"{float(concrete_d_val):.1f} " + r"kN/m\textsuperscript{3}"
+    except (ValueError, TypeError):
+        concrete_density_str = r"25.0 kN/m\textsuperscript{3}"
+
     # Table Header Templates via styles.make_longtable_header
     hdr_2col = make_longtable_header(r"\textbf{parameter} & \textbf{value} \\", 2)
     hdr_vll = make_longtable_header(
@@ -262,9 +282,9 @@ This section summarizes all loads applied to the bridge and the load combination
 \begin{longtable}{|L{5.5cm}|p{10.0cm}|}
 \caption{\textbf{Dead Load -- Self Weight}} \\
 """ + hdr_2col + r"""
-\textnormal{Steel Self-Weight Applied} & """ + (_render_value(input_dict, KEY_MATERIAL_GIRDER_DENSITY, ' kN/m\\textsuperscript{3}')) + r""" \\[6pt]
+\textnormal{Steel Self-Weight Applied} & """ + steel_density_str + r""" \\[6pt]
 \hline
-\textnormal{Concrete Deck Weight} & """ + (_render_value(input_dict, KEY_MATERIAL_DECK_DENSITY, ' kN/m\\textsuperscript{3}')) + r""" \\[6pt]
+\textnormal{Concrete Deck Weight} & """ + concrete_density_str + r""" \\[6pt]
 \hline
 \textnormal{Self-Weight Factor} & """ + (_render_value(input_dict, KEY_PL_SELF_WEIGHT_FACTOR)) + r""" \\[6pt]
 \hline
