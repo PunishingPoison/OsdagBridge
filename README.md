@@ -179,10 +179,34 @@ OsdagBridge/
 
 ---
 
-## 8. Execution Instructions
+## 8. Step-by-Step Guide: Running the Application & Generating Reports
 
-### 8.1 Launch the Desktop GUI
-To interactively open the bridge workspace, run analysis, and generate reports via the user interface:
+The application supports two primary workflows for generating design reports:
+1. **Interactive Desktop GUI Workflow**: Full graphical experience with 3D model visualization, design parameters ribbon, interactive analysis execution, and dual-mode report preview/save dialogs.
+2. **Headless Command-Line Workflow (CLI)**: Direct programmatic execution for automated pipelines, regression testing, or batch compilation.
+
+---
+
+### 8.1 Prerequisites & Environment Setup
+
+Ensure the project dependencies and Python environment are properly configured:
+- Python 3.10+ within Conda environment `osdagbridge-env`.
+- Bundled LaTeX compiler (`pdflatex.exe`) provided by `osdag_latex_env`.
+- OpenCASCADE / pythonOCC-core for 3D visualization.
+
+To activate the environment:
+```cmd
+conda activate osdagbridge-env
+```
+Or directly invoke the environment interpreter:
+`"C:\Users\prath\anaconda3\envs\osdagbridge-env\python.exe"`
+
+---
+
+### 8.2 Method 1: Interactive Desktop GUI Workflow
+
+#### Step 1: Launch the Desktop GUI
+Execute the following command from the repository root:
 
 **Windows Command Prompt (`cmd.exe`)**:
 ```cmd
@@ -196,26 +220,121 @@ Set-Location "C:\Users\prath\Downloads\OsdagBridge"
 & "C:\Users\prath\anaconda3\envs\osdagbridge-env\python.exe" -m osdagbridge.desktop
 ```
 
-### 8.2 Generate Reports Headless (CLI)
-To compile the PDF documents directly without launching the GUI:
+#### Step 2: Configure Bridge Input Parameters
+1. Upon startup, the main application window displays the 3D pythonOCC bridge viewport and the input parameter ribbon.
+2. Ensure the desired parameters are set (or load a model via **File -> Open**):
+   - **Bridge Type**: Composite Steel Plate Girder Bridge
+   - **Span Length**: 20.0 m
+   - **Carriageway Width**: 7.5 m (Two lanes)
+   - **Number of Girders**: 3
+   - **Girder Spacing**: 1.7167 m
+   - **Deck Slab Thickness**: 250 mm
+   - **Design Mode**: Optimized (or Custom if manual plate sizing is specified)
 
-**Generate Both Reports (`Report_Before.pdf` & `Report_After.pdf`)**:
+#### Step 3: Execute Analysis and Code Checks
+1. Click the **Design** button in the bottom-right corner of the application window.
+2. The solver will execute sequentially:
+   - Grillage discretization and loading per IRC:6-2017.
+   - Finite element structural analysis via OSPGrillage / OpenSees.
+   - Member design checks per IRC:22-2015, IRC:24-2010, IRC:112-2020, and IS 800:2007.
+3. Upon completion, the **Generate Results** summary dialog will appear, displaying critical member forces, governing deflections, and utilization ratios.
+
+#### Step 4: Open the Design Report Dialog
+1. Click **Create Design Report** in the results dialog (or click the **Report** icon on the top toolbar).
+2. The two-page modal dialog **Design Report** will open.
+
+#### Step 5: Configure Metadata (Page 1 - Project & Team Information)
+1. Page 1 displays three grouped metadata sections:
+   - **Project & Team Information**: Project Name, Designer, Reviewer, Organisation Name, and Logo.
+   - **Client & Job Information**: Client Name & Organisation, Job Number, and Report Version.
+   - **Additional Comments**: Project engineering scope and design standard notes.
+2. All fields are pre-populated with standard engineering defaults for immediate use:
+   - Project Name: `20m Composite Plate Girder Highway Bridge`
+   - Designer: `Osdag Design Team`
+   - Reviewer: `Lead Bridge Engineer`
+   - Organisation: `Osdag / FOSSEE, IIT Bombay`
+   - Client: `Ministry of Road Transport and Highways (MoRTH)`
+   - Job Number: `OB-2026-BR-001`
+   - Report Version: `Rev 0`
+3. You may keep these defaults or modify any field as needed. (Custom modifications are cached across subsequent dialog invocations within the session).
+4. Click **Next** to proceed to Page 2.
+
+#### Step 6: Select Sections & Generate PDF (Page 2 - Customize Report)
+1. Page 2 displays the chapter inclusion tree. Check or uncheck sections as desired (Executive Summary, Chapter 1, and Chapter 2 are required and locked).
+2. The action footer provides separate controls for both **Before** (Baseline) and **After** (Enhanced) reports:
+   - **Preview Controls**:
+     - **`Preview (After)`**: Immediately compiles the temporary enhanced 70-page report and launches your system's default PDF viewer. Does not prompt for a file save path.
+     - **`Preview (Before)`**: Compiles and opens a temporary preview of the baseline 36-page report.
+     - **`Back`**: Returns to Page 1 to revise metadata.
+     - **`Cancel`**: Closes the dialog without generating reports.
+   - **Save PDF Controls**:
+     - **`Save (After)`**: Prompts for a destination path (defaults to `Report_After.pdf`) and compiles the full enhanced report.
+     - **`Save (Before)`**: Prompts for a destination path (defaults to `Report_Before.pdf`) and compiles the baseline report.
+     - **`Save Both (Before & After)`**: Prompts to pick a destination folder and automatically compiles both `Report_Before.pdf` and `Report_After.pdf` in one automated background sequence.
+3. When the compilation finishes, a confirmation message box will display the saved PDF file paths.
+
+---
+
+### 8.3 Method 2: Headless Command-Line Workflow (CLI)
+
+For headless execution, continuous integration, or direct batch compilation without launching the graphical user interface, use the dedicated Python scripts located in the repository root:
+
+#### A. Generate Both Reports Together (Side-by-Side Comparison)
+Compiles both `Report_Before.pdf` (36 pages) and `Report_After.pdf` (70 pages) in the repository root:
+
+**Windows Command Prompt (`cmd.exe`)**:
 ```cmd
 cd /d "C:\Users\prath\Downloads\OsdagBridge"
 "C:\Users\prath\anaconda3\envs\osdagbridge-env\python.exe" generate_both_reports.py
 ```
 
-**Generate Enhanced Report Alone (`Report_After.pdf`)**:
+**Windows PowerShell**:
+```powershell
+Set-Location "C:\Users\prath\Downloads\OsdagBridge"
+& "C:\Users\prath\anaconda3\envs\osdagbridge-env\python.exe" generate_both_reports.py
+```
+
+#### B. Generate Enhanced Report Alone (`Report_After.pdf`)
+Runs the full structural solver, generates the Matplotlib charts and CAD drawing plates, and compiles `Report_After.pdf` (70 pages) with all Tier 1 & Tier 2 visual enhancements:
+
+**Windows Command Prompt (`cmd.exe`)**:
 ```cmd
 cd /d "C:\Users\prath\Downloads\OsdagBridge"
 "C:\Users\prath\anaconda3\envs\osdagbridge-env\python.exe" generate_enhanced.py
 ```
 
-**Generate Baseline Report Alone (`Report_Before.pdf`)**:
+**Windows PowerShell**:
+```powershell
+Set-Location "C:\Users\prath\Downloads\OsdagBridge"
+& "C:\Users\prath\anaconda3\envs\osdagbridge-env\python.exe" generate_enhanced.py
+```
+
+#### C. Generate Baseline Report Alone (`Report_Before.pdf`)
+Compiles `Report_Before.pdf` (36 pages) using the original baseline reporting pipeline:
+
+**Windows Command Prompt (`cmd.exe`)**:
 ```cmd
 cd /d "C:\Users\prath\Downloads\OsdagBridge"
 "C:\Users\prath\anaconda3\envs\osdagbridge-env\python.exe" generate_baseline.py
 ```
+
+**Windows PowerShell**:
+```powershell
+Set-Location "C:\Users\prath\Downloads\OsdagBridge"
+& "C:\Users\prath\anaconda3\envs\osdagbridge-env\python.exe" generate_baseline.py
+```
+
+---
+
+### 8.4 Verification of Output PDFs
+After running either workflow, verify the generated files:
+1. Open `Report_After.pdf`:
+   - Check **Page v** for the **Executive Engineering Scorecard** and the **Governing Structural Deficiencies** callout card.
+   - Check **Page 16** for **Table 3.3 (Vehicle Live Loads)** verifying clean unbroken headers and sub-row units `[kN]`.
+   - Check **Page 31** for **Table 5.2 (Girder Classification)** verifying that all 9 rows fit on a single page without continuation tags.
+   - Check **Page 64** for the final body page footer reading `Page 64 of 64`.
+2. Open `Report_Before.pdf`:
+   - Check that it reproduces the 36-page baseline layout for comparative assessment.
 
 ---
 
