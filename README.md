@@ -335,5 +335,3 @@ After running either workflow, verify the generated files:
    - Check **Page 64** for the final body page footer reading `Page 64 of 64`.
 2. Open `Report_Before.pdf`:
    - Check that it reproduces the 36-page baseline layout for comparative assessment.
-
----
