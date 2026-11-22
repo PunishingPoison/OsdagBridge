@@ -2,7 +2,7 @@
 
 **Repository**: [PunishingPoison/OsdagBridge](https://github.com/PunishingPoison/OsdagBridge)  
 **Target Branch**: `dev`  
-**Collaborator Added**: [Nidhikhare12](https://github.com/Nidhikhare12) (Verified with push/write permissions)  
+**Collaborator**: [Nidhikhare12](https://github.com/Nidhikhare12)
 **Primary Deliverables**:
 - Enhanced Design Report: `Report_After.pdf` (70 Pages, 2.79 MB)
 - Baseline Design Report: `Report_Before.pdf` (36 Pages, 344 KB)
@@ -337,10 +337,3 @@ After running either workflow, verify the generated files:
    - Check that it reproduces the 36-page baseline layout for comparative assessment.
 
 ---
-
-## 9. Collaborator Invitation & Verification
-
-Per the project submission requirements, user **Nidhikhare12** has been added as a collaborator to the repository:
-- **Collaborator Profile**: [Nidhikhare12](https://github.com/Nidhikhare12)
-- **Role & Permissions**: Write / Push Access
-- **Verification**: Confirmed active via GitHub API endpoint `/repos/PunishingPoison/OsdagBridge/collaborators`.
