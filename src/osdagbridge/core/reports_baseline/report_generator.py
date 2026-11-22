@@ -413,6 +413,8 @@ class ReportRequest:
     options: ReportOptions
     output_dir: str
     file_stem: str
+    is_baseline: bool = False
+    is_both: bool = False
 
 @dataclass
 class ReportFigures:

@@ -1316,11 +1316,25 @@ class CustomWindow(QWidget):
         try:
             dialog = ReportOptionsDialog(parent=self)
 
-            if hasattr(self, '_report_metadata') \
-                    and self._report_metadata:
-                dialog.project_name.setText(
-                    self._report_metadata.get(
-                        'project_name', ''))
+            if hasattr(self, '_report_metadata') and self._report_metadata:
+                if self._report_metadata.get('project_name'):
+                    dialog.project_name.setText(self._report_metadata['project_name'])
+                if self._report_metadata.get('designer'):
+                    dialog.designer.setText(self._report_metadata['designer'])
+                if self._report_metadata.get('reviewer'):
+                    dialog.reviewer.setText(self._report_metadata['reviewer'])
+                if self._report_metadata.get('company'):
+                    dialog.group_name.setText(self._report_metadata['company'])
+                if self._report_metadata.get('client'):
+                    dialog.client.setText(self._report_metadata['client'])
+                if self._report_metadata.get('job_number'):
+                    dialog.job_number.setText(self._report_metadata['job_number'])
+                if self._report_metadata.get('subtitle'):
+                    dialog.report_version.setText(self._report_metadata['subtitle'])
+                if self._report_metadata.get('additional_comments'):
+                    dialog.comments.setPlainText(self._report_metadata['additional_comments'])
+                if self._report_metadata.get('logo_path'):
+                    dialog.org_logo.setText(self._report_metadata['logo_path'])
 
             if dialog.exec() != QDialog.DialogCode.Accepted:
                 return
@@ -1355,16 +1369,46 @@ class CustomWindow(QWidget):
 
                 def run(self):
                     print("[REPORT-DEBUG] Worker.run() ENTERED")
-                    print(f"[REPORT-DEBUG]   backend type = {type(self._backend).__name__}")
-                    print(f"[REPORT-DEBUG]   has generate_design_report = {hasattr(self._backend, 'generate_design_report')}")
                     try:
-                        result = \
-                            self._backend \
-                            .generate_design_report(
-                                self._request,
+                        if getattr(self._request, 'is_both', False):
+                            import copy
+                            # 1. Baseline report (Report_Before.pdf)
+                            req_before = copy.copy(self._request)
+                            req_before.file_stem = "Report_Before"
+                            req_before.is_baseline = True
+                            print("[REPORT-DEBUG] Generating Baseline report (Report_Before.pdf)...")
+                            res_before = self._backend.generate_design_report(
+                                req_before,
                                 self._cad_gen,
-                                is_preview=self._is_preview,
+                                is_preview=False,
+                                is_baseline=True
                             )
+
+                            # 2. Enhanced report (Report_After.pdf)
+                            req_after = copy.copy(self._request)
+                            req_after.file_stem = "Report_After"
+                            req_after.is_baseline = False
+                            print("[REPORT-DEBUG] Generating Enhanced report (Report_After.pdf)...")
+                            res_after = self._backend.generate_design_report(
+                                req_after,
+                                self._cad_gen,
+                                is_preview=False,
+                                is_baseline=False
+                            )
+
+                            res_after.is_both = True
+                            res_after.before_pdf_path = getattr(res_before, 'pdf_path', None)
+                            result = res_after
+                        else:
+                            is_base = getattr(self._request, 'is_baseline', False)
+                            result = \
+                                self._backend \
+                                .generate_design_report(
+                                    self._request,
+                                    self._cad_gen,
+                                    is_preview=self._is_preview,
+                                    is_baseline=is_base,
+                                )
                         print(f"[REPORT-DEBUG] generate_design_report returned: {type(result).__name__}")
                     except Exception as exc:
                         import traceback as _tb
@@ -1398,8 +1442,15 @@ class CustomWindow(QWidget):
                     return
 
                 self._report_metadata = {
-                    'project_name':
-                        request.metadata.project_name,
+                    'project_name': request.metadata.project_name,
+                    'designer': request.metadata.designer,
+                    'reviewer': request.metadata.reviewer,
+                    'company': request.metadata.company,
+                    'client': request.metadata.client,
+                    'job_number': request.metadata.job_number,
+                    'subtitle': request.metadata.subtitle,
+                    'additional_comments': request.metadata.additional_comments,
+                    'logo_path': request.metadata.logo_path,
                 }
 
                 if result.pdf_path and \
@@ -1429,6 +1480,14 @@ class CustomWindow(QWidget):
                                 dialogType=
                                     MessageBoxType.Information,
                             ).exec()
+                    elif getattr(result, 'is_both', False):
+                        CustomMessageBox(
+                            title="Reports Generated Successfully",
+                            text="Both reports were generated successfully:\n\n"
+                                 f"• Baseline (Before):\n  {getattr(result, 'before_pdf_path', 'N/A')}\n\n"
+                                 f"• Enhanced (After):\n  {result.pdf_path}",
+                            dialogType=MessageBoxType.Success,
+                        ).exec()
                     else:
                         CustomMessageBox(
                             title="Report Generated "

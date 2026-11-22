@@ -31,7 +31,7 @@ class ReportOptionsDialog(QDialog):
         super().__init__(None)
         self._main_window = parent
         self.setObjectName("report_options_dialog")
-        self.resize(520, 650)
+        self.resize(580, 680)
 
         self.setStyleSheet(self._build_stylesheet())
 
@@ -55,6 +55,7 @@ class ReportOptionsDialog(QDialog):
 
         self.request = None
         self.is_preview = False
+        self.report_mode = "after"
 
     # ── stylesheet ───────────────────────────────────────────────────
 
@@ -172,13 +173,13 @@ class ReportOptionsDialog(QDialog):
         form1.setHorizontalSpacing(12)
         form1.setVerticalSpacing(8)
 
-        self.project_name = QLineEdit()
+        self.project_name = QLineEdit("20m Composite Plate Girder Highway Bridge")
         form1.addRow("Project Name :", self.project_name)
 
-        self.designer = QLineEdit()
+        self.designer = QLineEdit("Osdag Design Team")
         form1.addRow("Designer :", self.designer)
 
-        self.reviewer = QLineEdit()
+        self.reviewer = QLineEdit("Lead Bridge Engineer")
         form1.addRow("Reviewer :", self.reviewer)
 
         # Use / Save Profile buttons
@@ -197,7 +198,7 @@ class ReportOptionsDialog(QDialog):
         profile_layout.addStretch()
         form1.addRow("", profile_layout)
 
-        self.group_name = QLineEdit()
+        self.group_name = QLineEdit("Osdag / FOSSEE, IIT Bombay")
         form1.addRow("Organisation / Design Team Name :", self.group_name)
 
         # Organisation Logo (with Browse)
@@ -223,13 +224,13 @@ class ReportOptionsDialog(QDialog):
         form2.setHorizontalSpacing(12)
         form2.setVerticalSpacing(8)
 
-        self.client = QLineEdit()
+        self.client = QLineEdit("Ministry of Road Transport and Highways (MoRTH)")
         form2.addRow("Client Name && Organisation :", self.client)
 
-        self.job_number = QLineEdit()
+        self.job_number = QLineEdit("OB-2026-BR-001")
         form2.addRow("Job Number :", self.job_number)
 
-        self.report_version = QLineEdit()
+        self.report_version = QLineEdit("Rev 0")
         form2.addRow("Report Version :", self.report_version)
 
         box2.setLayout(form2)
@@ -242,6 +243,7 @@ class ReportOptionsDialog(QDialog):
 
         self.comments = QTextEdit()
         self.comments.setMinimumHeight(80)
+        self.comments.setPlainText("20m single span composite steel plate girder highway bridge designed in accordance with IRC:22-2015, IRC:112-2020, IRC:6-2017, and IS 800:2007.")
         box3_layout.addWidget(self.comments)
 
         box3.setLayout(box3_layout)
@@ -313,32 +315,82 @@ class ReportOptionsDialog(QDialog):
 
         self.tree.expandAll()
 
-        btn_layout = QHBoxLayout()
-        preview_btn = QPushButton("Preview PDF")
-        preview_btn.setObjectName("ghost")
-        preview_btn.setCursor(pointing_hand_cursor())
-        preview_btn.clicked.connect(self.preview_pdf)
-        btn_layout.addWidget(preview_btn)
-        btn_layout.addStretch()
+        # Action controls container
+        actions_box = QVBoxLayout()
+        actions_box.setSpacing(10)
+
+        # Row 1: Preview actions + Navigation (Back / Cancel)
+        row1_layout = QHBoxLayout()
+        row1_layout.setSpacing(8)
+
+        preview_lbl = QLabel("Preview:")
+        preview_lbl.setStyleSheet("font-weight: 600; color: #444;")
+        row1_layout.addWidget(preview_lbl)
+
+        preview_after_btn = QPushButton("Preview (After)")
+        preview_after_btn.setObjectName("primary")
+        preview_after_btn.setToolTip("Preview the enhanced Scope of Work design report (Report_After.pdf)")
+        preview_after_btn.setCursor(pointing_hand_cursor())
+        preview_after_btn.clicked.connect(self.preview_after_pdf)
+        row1_layout.addWidget(preview_after_btn)
+
+        preview_before_btn = QPushButton("Preview (Before)")
+        preview_before_btn.setObjectName("ghost")
+        preview_before_btn.setToolTip("Preview the baseline initial installation design report (Report_Before.pdf)")
+        preview_before_btn.setCursor(pointing_hand_cursor())
+        preview_before_btn.clicked.connect(self.preview_before_pdf)
+        row1_layout.addWidget(preview_before_btn)
+
+        row1_layout.addStretch()
 
         back_btn = QPushButton("Back")
         back_btn.setObjectName("ghost")
         back_btn.setCursor(pointing_hand_cursor())
         back_btn.clicked.connect(self.go_back)
-        save_btn = QPushButton("Save PDF")
-        save_btn.setObjectName("primary")
-        save_btn.setCursor(pointing_hand_cursor())
-        save_btn.clicked.connect(self.save_pdf)
+        row1_layout.addWidget(back_btn)
+
         cancel_btn = QPushButton("Cancel")
         cancel_btn.setObjectName("ghost")
         cancel_btn.setCursor(pointing_hand_cursor())
         cancel_btn.clicked.connect(self.reject)
+        row1_layout.addWidget(cancel_btn)
 
-        btn_layout.addWidget(back_btn)
-        btn_layout.addWidget(save_btn)
-        btn_layout.addWidget(cancel_btn)
+        actions_box.addLayout(row1_layout)
 
-        layout.addLayout(btn_layout)
+        # Row 2: Save / Download actions
+        row2_layout = QHBoxLayout()
+        row2_layout.setSpacing(8)
+
+        save_lbl = QLabel("Save PDF:")
+        save_lbl.setStyleSheet("font-weight: 600; color: #444;")
+        row2_layout.addWidget(save_lbl)
+
+        save_after_btn = QPushButton("Save (After)")
+        save_after_btn.setObjectName("primary")
+        save_after_btn.setToolTip("Save the enhanced Scope of Work design report (Report_After.pdf)")
+        save_after_btn.setCursor(pointing_hand_cursor())
+        save_after_btn.clicked.connect(self.save_after_pdf)
+        row2_layout.addWidget(save_after_btn)
+
+        save_before_btn = QPushButton("Save (Before)")
+        save_before_btn.setObjectName("ghost")
+        save_before_btn.setToolTip("Save the baseline initial installation design report (Report_Before.pdf)")
+        save_before_btn.setCursor(pointing_hand_cursor())
+        save_before_btn.clicked.connect(self.save_before_pdf)
+        row2_layout.addWidget(save_before_btn)
+
+        save_both_btn = QPushButton("Save Both (Before & After)")
+        save_both_btn.setObjectName("primary")
+        save_both_btn.setToolTip("Save both Report_Before.pdf and Report_After.pdf to a chosen directory")
+        save_both_btn.setCursor(pointing_hand_cursor())
+        save_both_btn.clicked.connect(self.save_both_pdf)
+        row2_layout.addWidget(save_both_btn)
+
+        row2_layout.addStretch()
+
+        actions_box.addLayout(row2_layout)
+
+        layout.addLayout(actions_box)
 
     # ── actions ──────────────────────────────────────────────────────
 
@@ -501,7 +553,7 @@ class ReportOptionsDialog(QDialog):
 
     # ── build report request ─────────────────────────────────────────
 
-    def build_request(self, output_path: str) -> ReportRequest:
+    def build_request(self, output_path: str, is_baseline: bool = False, is_both: bool = False) -> ReportRequest:
         output_path = os.path.abspath(output_path)
         output_dir = os.path.dirname(output_path)
         if not output_dir:
@@ -539,22 +591,68 @@ class ReportOptionsDialog(QDialog):
             metadata=metadata,
             options=options,
             output_dir=output_dir,
-            file_stem=file_stem
+            file_stem=file_stem,
+            is_baseline=is_baseline,
+            is_both=is_both,
         )
 
-    def preview_pdf(self):
+    def preview_after_pdf(self):
         import tempfile
-        tmp_dir = tempfile.mkdtemp(prefix="osdag_preview_")
-        path = os.path.join(tmp_dir, "preview_report.pdf")
-        self.request = self.build_request(path)
+        tmp_dir = tempfile.mkdtemp(prefix="osdag_preview_after_")
+        path = os.path.join(tmp_dir, "Report_After_Preview.pdf")
+        self.request = self.build_request(path, is_baseline=False)
         self.is_preview = True
+        self.report_mode = "after"
         self.accept()
 
-    def save_pdf(self):
+    def preview_before_pdf(self):
+        import tempfile
+        tmp_dir = tempfile.mkdtemp(prefix="osdag_preview_before_")
+        path = os.path.join(tmp_dir, "Report_Before_Preview.pdf")
+        self.request = self.build_request(path, is_baseline=True)
+        self.is_preview = True
+        self.report_mode = "before"
+        self.accept()
+
+    def save_after_pdf(self):
         path, _ = QFileDialog.getSaveFileName(
-            self, "Save PDF", "", "PDF Files (*.pdf)"
+            self, "Save After (Enhanced) PDF Report", "Report_After.pdf", "PDF Files (*.pdf)"
         )
         if path:
-            self.request = self.build_request(path)
+            self.request = self.build_request(path, is_baseline=False)
             self.is_preview = False
+            self.report_mode = "after"
             self.accept()
+
+    def save_before_pdf(self):
+        path, _ = QFileDialog.getSaveFileName(
+            self, "Save Before (Baseline) PDF Report", "Report_Before.pdf", "PDF Files (*.pdf)"
+        )
+        if path:
+            self.request = self.build_request(path, is_baseline=True)
+            self.is_preview = False
+            self.report_mode = "before"
+            self.accept()
+
+    def save_both_pdf(self):
+        dir_path = QFileDialog.getExistingDirectory(
+            self,
+            "Select Folder to Save Both Reports (Report_Before.pdf & Report_After.pdf)",
+            os.path.expanduser("~")
+        )
+        if dir_path:
+            path = os.path.join(dir_path, "Report_After.pdf")
+            self.request = self.build_request(path, is_baseline=False, is_both=True)
+            self.request.output_dir = dir_path
+            self.request.file_stem = "Report_After"
+            self.is_preview = False
+            self.report_mode = "both"
+            self.accept()
+
+    def preview_pdf(self):
+        """Fallback alias for preview_after_pdf."""
+        self.preview_after_pdf()
+
+    def save_pdf(self):
+        """Fallback alias for save_after_pdf."""
+        self.save_after_pdf()
