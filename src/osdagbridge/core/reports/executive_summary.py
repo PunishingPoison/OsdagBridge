@@ -336,49 +336,53 @@ This section provides a concise summary of the bridge design, key inputs, govern
 \vspace{0.8em}
 
 \begingroup
-\setlength{\tabcolsep}{4pt}
-\begin{longtable}{|L{3.3cm}|L{4.2cm}|C{2.4cm}|C{2.4cm}|C{1.5cm}|C{1.6cm}|}
+\small
+\setlength{\tabcolsep}{3.5pt}
+\renewcommand{\arraystretch}{1.02}
+\begin{longtable}{|L{3.1cm}|L{4.2cm}|C{2.5cm}|C{2.5cm}|C{1.4cm}|C{1.5cm}|}
 \hline
 \textbf{Component} & \textbf{Governing Check} & \textbf{Demand} & \textbf{Capacity} & \textbf{UR} & \textbf{Status} \\
 \hline
 \endhead
 \hline
 \multirow{5}{*}{\makecell[l]{\textbf{Steel Plate}\\\textbf{Girders}}} 
- & Fatigue Normal Stress (IS 800 Cl. 13) & $114.90\text{ MPa}$ & $85.00\text{ MPa}$ & \textcolor{failRed}{\textbf{1.35}} & \failBadge{} \\[4pt]
+ & Fatigue Normal Stress (IS 800 Cl. 13) & $114.90\text{ MPa}$ & $85.00\text{ MPa}$ & \textcolor{failRed}{\textbf{1.35}} & \failBadge{} \\[1.5pt]
 \cline{2-6}
- & Total Load Deflection (IRC 24 Cl. 505.2) & $37.14\text{ mm}$ & $33.33\text{ mm}$ ($L/600$) & \textcolor{failRed}{\textbf{1.11}} & \failBadge{} \\[4pt]
+ & Total Load Deflection (IRC 24 Cl. 505.2) & $37.14\text{ mm}$ & $33.33\text{ mm}$ ($L/600$) & \textcolor{failRed}{\textbf{1.11}} & \failBadge{} \\[1.5pt]
 \cline{2-6}
- & Live Load Deflection (IRC 24 Cl. 505.2) & $15.50\text{ mm}$ & $25.00\text{ mm}$ ($L/800$) & 0.62 & \passBadge{} \\[4pt]
+ & Live Load Deflection (IRC 24 Cl. 505.2) & $15.50\text{ mm}$ & $25.00\text{ mm}$ ($L/800$) & 0.62 & \passBadge{} \\[1.5pt]
 \cline{2-6}
- & Sagging Moment (IRC 22 Cl. 603.3.1) & $694.47\text{ kNm}$ & $4356.80\text{ kNm}$ & 0.16 & \passBadge{} \\[4pt]
+ & Sagging Moment (IRC 22 Cl. 603.3.1) & $694.47\text{ kNm}$ & $4356.80\text{ kNm}$ & 0.16 & \passBadge{} \\[1.5pt]
 \cline{2-6}
- & Max Vertical Shear (IS 800 Cl. 8.4) & $160.38\text{ kN}$ & $553.40\text{ kN}$ & 0.29 & \passBadge{} \\[4pt]
+ & Max Vertical Shear (IS 800 Cl. 8.4) & $160.38\text{ kN}$ & $553.40\text{ kN}$ & 0.29 & \passBadge{} \\[1.5pt]
 \hline
 \multirow{3}{*}{\makecell[l]{\textbf{RC Deck}\\\textbf{Slab}}} 
- & Transverse Sagging (IRC 112 Cl. 8) & $84.20\text{ kNm/m}$ & $110.80\text{ kNm/m}$ & 0.76 & \passBadge{} \\[4pt]
+ & Transverse Sagging (IRC 112 Cl. 8) & $84.20\text{ kNm/m}$ & $110.80\text{ kNm/m}$ & 0.76 & \passBadge{} \\[1.5pt]
 \cline{2-6}
- & Cantilever Overhang (IRC 112 Cl. 8) & $18.45\text{ kNm/m}$ & $45.60\text{ kNm/m}$ & 0.40 & \passBadge{} \\[4pt]
+ & Cantilever Overhang (IRC 112 Cl. 8) & $18.45\text{ kNm/m}$ & $45.60\text{ kNm/m}$ & 0.40 & \passBadge{} \\[1.5pt]
 \cline{2-6}
- & Punching Shear (IRC 112 Cl. 10.4.6) & $0.147\text{ MPa}$ & $0.555\text{ MPa}$ & 0.26 & \passBadge{} \\[4pt]
+ & Punching Shear (IRC 112 Cl. 10.4.6) & $0.147\text{ MPa}$ & $0.555\text{ MPa}$ & 0.26 & \passBadge{} \\[1.5pt]
 \hline
 \multirow{2}{*}{\makecell[l]{\textbf{Cross}\\\textbf{Bracing}}} 
- & Slenderness $\lambda = L/r$ (IS 800 Cl. 3.8) & 118.4 & 140.0 & 0.85 & \passBadge{} \\[4pt]
+ & Slenderness $\lambda = L/r$ (IS 800 Cl. 3.8) & 118.4 & 140.0 & 0.85 & \passBadge{} \\[1.5pt]
 \cline{2-6}
- & Compression Capacity (IS 800 Cl. 7) & $45.20\text{ kN}$ & $102.50\text{ kN}$ & 0.44 & \passBadge{} \\[4pt]
+ & Compression Capacity (IS 800 Cl. 7) & $45.20\text{ kN}$ & $102.50\text{ kN}$ & 0.44 & \passBadge{} \\[1.5pt]
 \hline
 \multirow{2}{*}{\makecell[l]{\textbf{End Diaphragms}\\\textbf{\& Bearings}}} 
- & Bearing Stiffener Column (IS 800 Cl. 8.7.1.5) & $160.38\text{ kN}$ & $1864.55\text{ kN}$ & 0.09 & \passBadge{} \\[4pt]
+ & Bearing Stiffener Column (IS 800 Cl. 8.7.1.5) & $160.38\text{ kN}$ & $1864.55\text{ kN}$ & 0.09 & \passBadge{} \\[1.5pt]
 \cline{2-6}
- & Diaphragm Slenderness (IS 800 Cl. 3.8) & 112.1 & 140.0 & 0.80 & \passBadge{} \\[4pt]
+ & Diaphragm Slenderness (IS 800 Cl. 3.8) & 112.1 & 140.0 & 0.80 & \passBadge{} \\[1.5pt]
 \hline
-\textbf{Shear Studs} & Longitudinal Shear (IRC 22 Cl. 606) & $145.20\text{ kN/m}$ & $605.00\text{ kN/m}$ & 0.24 & \passBadge{} \\[4pt]
+\textbf{Shear Studs} & Longitudinal Shear (IRC 22 Cl. 606) & $145.20\text{ kN/m}$ & $605.00\text{ kN/m}$ & 0.24 & \passBadge{} \\[1.5pt]
 \hline
 \end{longtable}
 \endgroup
 
+\vspace{-0.3cm}
 \begin{engWarningBox}[Governing Structural Deficiencies \& Recommended Engineering Action]
-\begin{itemize}[leftmargin=1.5em,itemsep=2pt,topsep=1pt]
-\item \textbf{Fatigue Normal Stress ($UR = 1.35$, FAIL):} Under cyclic IRC Class 70R loading, tension flange stress range ($\Delta\sigma = 114.90\text{ MPa}$) exceeds the Detail Category 80 allowable ($85.00\text{ MPa}$). \textit{Action: Increase bottom tension flange thickness from $18\text{ mm}$ to $22\text{ mm}$ or specify ground flush welds to achieve Category 100.}
+\small
+\begin{itemize}[leftmargin=1.5em,itemsep=1pt,topsep=1pt]
+\item \textbf{Fatigue Normal Stress ($UR = 1.35$, FAIL):} Under cyclic IRC Class 70R loading, tension flange stress range ($\Delta\sigma = 114.90\text{ MPa}$) exceeds Detail Category 80 allowable ($85.00\text{ MPa}$). \textit{Action: Increase bottom tension flange thickness from $18\text{ mm}$ to $22\text{ mm}$ or specify ground flush welds to achieve Category 100.}
 \item \textbf{Total Load Deflection ($UR = 1.11$, FAIL):} Long-term total deflection $\delta_{tot} = 37.14\text{ mm}$ exceeds $L/600 = 33.33\text{ mm}$ by $3.81\text{ mm}$. Live load deflection alone complies ($\delta_{ll} = 15.50\text{ mm} \le L/800 = 25.00\text{ mm}$, PASS). \textit{Action: Provide $5.0\text{ mm}$ fabrication pre-camber per IRC 24:2010 Clause 505.2.2.}
 \end{itemize}
 \end{engWarningBox}
