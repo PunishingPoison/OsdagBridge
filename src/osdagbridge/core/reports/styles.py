@@ -39,6 +39,36 @@ LATEX_COLOR_DEFINITIONS = r"""
 \definecolor{passGreen}{RGB}{46,125,50}
 \definecolor{failRed}{RGB}{198,40,40}
 \definecolor{warnOrange}{RGB}{245,124,0}
+\definecolor{passBg}{RGB}{235,242,225}
+\definecolor{failBg}{RGB}{253,237,237}
+
+% Status Badges (Clean, Print-Safe Subtle Pastels)
+\newcommand{\passBadge}{\colorbox{passBg}{\textcolor{passGreen}{\textbf{PASS}}}}
+\newcommand{\failBadge}{\colorbox{failBg}{\textcolor{failRed}{\textbf{FAIL}}}}
+
+% Styled Engineering Callout Boxes (tcolorbox)
+\newtcolorbox{engWarningBox}[1][]{
+  colback=failBg,
+  colframe=failRed,
+  coltitle=white,
+  fonttitle=\bfseries,
+  title={#1},
+  arc=1.5mm,
+  boxrule=0.8pt,
+  left=8pt, right=8pt, top=6pt, bottom=6pt,
+  before skip=8pt, after skip=8pt
+}
+\newtcolorbox{engInfoBox}[1][]{
+  colback=osdagLightGray,
+  colframe=osdagNavy,
+  coltitle=white,
+  fonttitle=\bfseries,
+  title={#1},
+  arc=1.5mm,
+  boxrule=0.8pt,
+  left=8pt, right=8pt, top=6pt, bottom=6pt,
+  before skip=8pt, after skip=8pt
+}
 """
 
 # =============================================================================

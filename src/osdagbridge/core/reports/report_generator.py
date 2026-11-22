@@ -219,6 +219,7 @@ def preamble(project_name, job_number, report_date, report_version='Rev 0'):
 \usepackage{makecell}
 \usepackage{etoolbox}
 \usepackage{needspace}
+\usepackage{tcolorbox}
 
 \numberwithin{table}{chapter}
 \numberwithin{figure}{chapter}
@@ -272,12 +273,19 @@ def preamble(project_name, job_number, report_date, report_version='Rev 0'):
     \color{osdagGreen}\hrule width\headwidth height 1pt \vspace{4pt}%
   }
 }
+\fancypagestyle{frontmatter}{
+  \fancyhf{}
+  \fancyhead[L]{""" + pn + r""" $|$ """ + jn + r"""}
+  \fancyhead[R]{""" + rd + r""" $|$ """ + rv + r"""}
+  \fancyfoot[L]{Osdag $|$ FOSSEE $|$ Indian Institute of Technology Bombay}
+  \fancyfoot[R]{Page \thepage}
+  \renewcommand{\headrule}{\color{osdagGreen}\hrule width\headwidth height 1pt \vspace{2pt}}
+  \renewcommand{\footrule}{\color{osdagGreen}\hrule width\headwidth height 1pt \vspace{4pt}}
+}
 \fancypagestyle{firstpage}{
   \fancyhf{}
   \renewcommand{\headrulewidth}{0pt}
-  \fancyfoot[L]{Osdag $|$ FOSSEE $|$ Indian Institute of Technology Bombay}
-  \fancyfoot[R]{Page \thepage\ of \pageref{LastPage}}
-  \renewcommand{\footrule}{\color{osdagGreen}\hrule width\headwidth height 1pt \vspace{4pt}}
+  \renewcommand{\footrulewidth}{0pt}
 }
 \pagestyle{main}
 \setstretch{1.15}
@@ -364,6 +372,9 @@ def title_page(m, osdag_logo, org_logo):
 \hline
 \end{tabular}
 \end{titlepage}
+\pagenumbering{roman}
+\setcounter{page}{1}
+\pagestyle{frontmatter}
 """
 
 
@@ -1044,6 +1055,12 @@ def generate_report(payload, request):
             secs = payload.options.sections
 
             doc_parts.append(executive_summary(payload.inputs, payload.output_dict, fig_paths))
+            doc_parts.append(r"""
+\clearpage
+\pagenumbering{arabic}
+\setcounter{page}{1}
+\pagestyle{main}
+""")
             doc_parts.append(ch1_project_info(payload.metadata))
             doc_parts.append(ch2_input_parameters(payload.metadata, payload.inputs, payload.output_dict))
 

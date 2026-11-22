@@ -240,7 +240,7 @@ def ch5_design_checks(checks_data, bridge, fig_paths=None) -> str:
 \cline{2-5}
  & Design Moment Capacity, $M_d$ & IRC 22:2015 Cl. 603.3.1 & """ + _render_value(bridge.output_dict, KEY_SD_MD_CAPACITY, " kN-m") + r""" & --- \\[6pt]
 \cline{2-5}
- & Utilization Ratio, $M_u / M_d$ & $M_u / M_d$ & """ + f"{mu_ur:.2f}" + r""" & \textcolor{passGreen}{\textbf{PASS}} \\[6pt]
+ & Utilization Ratio, $M_u / M_d$ & $M_u / M_d$ & """ + f"{mu_ur:.2f}" + r""" & \passBadge{} \\[6pt]
 \hline"""
         )
     t53_content = "\n".join(t53_rows)
@@ -266,7 +266,7 @@ def ch5_design_checks(checks_data, bridge, fig_paths=None) -> str:
 \cline{2-5}
  & Shear Buckling Resistance, $V_{cr}$ & $A_v \times \tau_b$ & """ + _render_value(bridge.output_dict, KEY_SD_SHEAR_VCR, " kN") + r""" & --- \\[6pt]
 \cline{2-5}
- & Utilization Ratio, $V_u / V_{cr}$ & $V_u / V_{cr}$ & """ + f"{vu_ur:.2f}" + r""" & \textcolor{passGreen}{\textbf{PASS}} \\[6pt]
+ & Utilization Ratio, $V_u / V_{cr}$ & $V_u / V_{cr}$ & """ + f"{vu_ur:.2f}" + r""" & \passBadge{} \\[6pt]
 \hline"""
         )
     t54_content = "\n".join(t54_rows)
@@ -384,7 +384,7 @@ def ch5_design_checks(checks_data, bridge, fig_paths=None) -> str:
     # Status: PASS when Provided ≥ Required.
     def _ge_status(provided, required):
         try:
-            return "PASS" if float(provided) >= float(required) else r"\textcolor{red}{FAIL}"
+            return r"\passBadge{}" if float(provided) >= float(required) else r"\failBadge{}"
         except (TypeError, ValueError):
             return "---"
     _iys_status = _ge_status(bridge.output_dict.get(KEY_SD_IS_IYS_PROV),
@@ -440,11 +440,11 @@ def ch5_design_checks(checks_data, bridge, fig_paths=None) -> str:
         t59_rows.append(
             r"\multirow{4}{*}{\makecell{" + lbl + r"""}} & \makecell[l]{Preliminary Check: Unstiffened\\Web Buckling, $F_{cdw}$ (IS 800 Cl. 8.7.3.1)} & """ + r_str + r""" & """ + f"{_fcdw_prov:.2f} kN" + r""" & \makecell{Stiffeners\\Required} \\[6pt]
 \cline{2-5}
- & \makecell[l]{Local Web Crushing, $F_{cdw,lc}$\\(IS 800:2007 Cl. 8.7.3.2)} & """ + r_str + r""" & """ + f"{_flc_prov:.2f} kN" + r""" & \textcolor{passGreen}{\textbf{PASS}} \\[6pt]
+ & \makecell[l]{Local Web Crushing, $F_{cdw,lc}$\\(IS 800:2007 Cl. 8.7.3.2)} & """ + r_str + r""" & """ + f"{_flc_prov:.2f} kN" + r""" & \passBadge{} \\[6pt]
 \cline{2-5}
- & \makecell[l]{Bearing Contact Pressure, $F_{psd}$\\(IS 800:2007 Cl. 8.7.3.3)} & """ + r_str + r""" & """ + f"{_fpsd_prov:.2f} kN" + r""" & \textcolor{passGreen}{\textbf{PASS}} \\[6pt]
+ & \makecell[l]{Bearing Contact Pressure, $F_{psd}$\\(IS 800:2007 Cl. 8.7.3.3)} & """ + r_str + r""" & """ + f"{_fpsd_prov:.2f} kN" + r""" & \passBadge{} \\[6pt]
 \cline{2-5}
- & \makecell[l]{Stiffened Column Buckling, $F_{cd}$\\(IS 800:2007 Cl. 8.7.1.5)} & """ + r_str + r""" & """ + f"{_fcd_prov:.2f} kN" + r""" & \makecell{\textcolor{passGreen}{\textbf{PASS}}\\\footnotesize(UR = """ + f"{col_ur:.3f}" + r""")} \\[6pt]
+ & \makecell[l]{Stiffened Column Buckling, $F_{cd}$\\(IS 800:2007 Cl. 8.7.1.5)} & """ + r_str + r""" & """ + f"{_fcd_prov:.2f} kN" + r""" & \makecell{\passBadge{}\\\footnotesize(UR = """ + f"{col_ur:.3f}" + r""")} \\[6pt]
 \hline"""
         )
     t59_content = "\n".join(t59_rows)
@@ -459,7 +459,7 @@ def ch5_design_checks(checks_data, bridge, fig_paths=None) -> str:
     def _defl_status(actual, allowable):
         """PASS / red FAIL for deflection; '---' when values are missing."""
         try:
-            return "PASS" if float(actual) <= float(allowable) else r"\textcolor{red}{FAIL}"
+            return r"\passBadge{}" if float(actual) <= float(allowable) else r"\failBadge{}"
         except (TypeError, ValueError):
             return "---"
 
@@ -517,7 +517,7 @@ def ch5_design_checks(checks_data, bridge, fig_paths=None) -> str:
 
     def _stress_status(actual, allow):
         try:
-            return "PASS" if float(actual) <= float(allow) else r"\textcolor{red}{FAIL}"
+            return r"\passBadge{}" if float(actual) <= float(allow) else r"\failBadge{}"
         except (TypeError, ValueError):
             return "---"
 
@@ -678,7 +678,7 @@ Fatigue Shear Resistance, $Q_r$ & IRC 22 Table 8 ($\phi d$, $N_{sc}$) & """
     else:
         _ts_ur_str = "---"
     _ts_ok = _dr_sc.get("transverse_shear_ok")
-    _ts_status = (r"\textcolor{red}{FAIL}" if _ts_ok is False else "PASS") if _ts_ok is not None else "---"
+    _ts_status = (r"\failBadge{}" if _ts_ok is False else r"\passBadge{}") if _ts_ok is not None else "---"
 
     _ast_req  = _dr_sc.get("Ast_required_cm2_per_m")
     # Provided transverse steel = the deck's main (bottom + top) bars, which run
@@ -762,7 +762,7 @@ Fatigue Shear Resistance, $Q_r$ & IRC 22 Table 8 ($\phi d$, $N_{sc}$) & """
     def get_status_str(slnd_str, limit):
         try:
             v = float(slnd_str)
-            return r"\textcolor{black}{PASS}" if v <= limit else r"\textcolor{red}{FAIL}"
+            return r"\passBadge{}" if v <= limit else r"\failBadge{}"
         except (ValueError, TypeError):
             return ""
     cb_slenderness_rows = []
@@ -822,7 +822,7 @@ Fatigue Shear Resistance, $Q_r$ & IRC 22 Table 8 ($\phi d$, $N_{sc}$) & """
                 except (ValueError, TypeError):
                     pass
             ur = f"{ur_val:.3f}" if ur_val > 0 else bridge.get_cb_efficiency(pair, member, ftype)
-            status = r"\textcolor{black}{PASS}" if ur_val <= 1.0 else r"\textcolor{red}{FAIL}"
+            status = r"\passBadge{}" if ur_val <= 1.0 else r"\failBadge{}"
             rows_for_pair.append(
                 r" & " + label + r" & " + section
                 + r" & " + gov_lc + r" & " + force_str + r" & " + capacity
@@ -900,7 +900,7 @@ Fatigue Shear Resistance, $Q_r$ & IRC 22 Table 8 ($\phi d$, $N_{sc}$) & """
                 except (ValueError, TypeError):
                     pass
             ur = f"{ur_val:.3f}" if ur_val > 0 else bridge.get_cb_efficiency(pair, member, ftype)
-            status = r"\textcolor{black}{PASS}" if ur_val <= 1.0 else r"\textcolor{red}{FAIL}"
+            status = r"\passBadge{}" if ur_val <= 1.0 else r"\failBadge{}"
             rows_for_pair.append(
                 r" & " + label + r" & " + section
                 + r" & " + gov_lc + r" & " + force_str + r" & " + capacity
@@ -947,7 +947,7 @@ Fatigue Shear Resistance, $Q_r$ & IRC 22 Table 8 ($\phi d$, $N_{sc}$) & """
 
     def _dks(ok):
         """PASS/FAIL status; '---' when deck design not run."""
-        return ("PASS" if ok else "FAIL") if _dk_has else "---"
+        return (r"\passBadge{}" if ok else r"\failBadge{}") if _dk_has else "---"
 
     def _dkoh(key, nd=2, scale=1.0, unit=""):
         """Overhang value; 'N/A' when there is no overhang."""
@@ -1097,8 +1097,8 @@ Fatigue Shear Resistance, $Q_r$ & IRC 22 Table 8 ($\phi d$, $N_{sc}$) & """
             clean = str(v).replace(r"\textcolor{red}{", "").replace(r"\textcolor{failRed}{", "").replace("}", "").strip()
             f = float(clean)
             if f > 1.0:
-                return r"\textcolor{failRed}{\textbf{FAIL}}"
-            return r"\textcolor{passGreen}{\textbf{PASS}}"
+                return r"\failBadge{}"
+            return r"\passBadge{}"
         except (TypeError, ValueError):
             return "---"
 
@@ -1286,7 +1286,7 @@ This section presents all structural design checks performed by OsdagBridge. For
 """ + t51_content + r"""
 \end{longtable}
 
-\vspace{1em}
+\clearpage
 """ + NEEDSPACE_TABLE + r"""
 \begin{longtable}{|C{2.5cm}|L{3cm}|C{3.5cm}|C{2.5cm}|>{\centering\arraybackslash}p{4.0cm}|}
 \caption{\textbf{Girder Section Classification}} \\
@@ -1346,7 +1346,7 @@ This section presents all structural design checks performed by OsdagBridge. For
 """ + t59_hdr + r"""
 """ + t59_content + r"""
 \end{longtable}
-\noindent\textit{Note: Bearing Stiffener Verification \& Full Calculation Methodology (IS 800:2007 Cl.~8.7.3 \& Cl.~8.7.1.5, IRC 24:2010 Cl.~509.7.3):}
+\begin{engInfoBox}[Bearing Stiffener Design Verification \& Calculation Methodology (IS 800:2007 Cl.~8.7.3 \& Cl.~8.7.1.5)]
 \begin{enumerate}[label=(\alph*),leftmargin=1.8em,itemsep=1pt,topsep=2pt]
 \item \textbf{Preliminary Web Buckling Check (IS 800 Cl.~8.7.3.1):} Unstiffened web buckling resistance $F_{cdw} = \frac{(b_1 + n_1)\,t_w\,f_{cd,w}}{\gamma_{m0}} = 68.78\text{ kN} < R$ (applied reaction $R = 160.38\text{ kN}$ on exterior girders G1/G3; $130.46\text{ kN}$ on interior girder G2). Since $F_{cdw} < R$, bearing stiffeners are mandatory.
 \item \textbf{Provided Configuration:} 4 flat plates $\times$ 10~mm thickness arranged as two pairs spaced at 100~mm c/c, outstand $H = 165\text{ mm}$ on each side of the web, matching Table 2.8, Table 5.7, and CAD drawings.
@@ -1354,10 +1354,11 @@ This section presents all structural design checks performed by OsdagBridge. For
 \item \textbf{Slenderness and Design Compressive Stress:} Effective column length $KL = 0.7 d = 0.7 \times 1088 = 761.6\text{ mm}$ (both flanges restrained laterally). Slenderness $\lambda = KL / r_y = 11.28$. For buckling curve c ($\alpha = 0.49$) and $f_y = 250\text{ MPa}$, design compressive stress $f_{cd} = 227.27\text{ MPa}$.
 \item \textbf{Stiffened Column Capacity and Governing Demands:} Axial capacity $F_{cd} = A_{eff} \cdot f_{cd} = 1864.55\text{ kN} \geq R$ governs stability:
 \begin{itemize}
-\item Exterior Girders G1 and G3: Governing reaction $R = 160.38\text{ kN}$ under ACCIDENTAL 1 (1.0 DL + 1.0 DW + 0.75 LL) $\implies UR = 160.38 / 1864.55 = 0.086 \le 1.0$ (\textcolor{passGreen}{\textbf{PASS}}).
-\item Interior Girder G2: Governing reaction $R = 130.46\text{ kN}$ under ACCIDENTAL 1 $\implies UR = 130.46 / 1864.55 = 0.070 \le 1.0$ (\textcolor{passGreen}{\textbf{PASS}}).
+\item Exterior Girders G1 and G3: Governing reaction $R = 160.38\text{ kN}$ under ACCIDENTAL 1 (1.0 DL + 1.0 DW + 0.75 LL) $\implies UR = 160.38 / 1864.55 = 0.086 \le 1.0$ (\passBadge{}).
+\item Interior Girder G2: Governing reaction $R = 130.46\text{ kN}$ under ACCIDENTAL 1 $\implies UR = 130.46 / 1864.55 = 0.070 \le 1.0$ (\passBadge{}).
 \end{itemize}
 \end{enumerate}
+\end{engInfoBox}
 
 \clearpage
 """ + NEEDSPACE_TABLE + r"""
@@ -1680,6 +1681,12 @@ End diaphragms at the supports transfer transverse loads to the bearings, restra
 """ + t530_hdr + r"""
 """ + t522_content + r"""
 \end{longtable}
-\noindent\textit{Note: UR = Demand / Capacity. Checks with $\text{UR} \leq 1.00$ satisfy design criteria (\textcolor{passGreen}{\textbf{PASS}}); checks exceeding $1.00$ exceed code limits and require section revision (\textcolor{failRed}{\textbf{FAIL}}). The overall design fails due to total serviceability deflection ($\text{UR} = 1.11$) and fatigue normal stress ($\text{UR} = 1.35$).}
+\begin{engWarningBox}[Design Check Summary Evaluation: Governing Structural Deficiencies]
+\noindent\textit{Note: Utilization Ratio ($\text{UR}$) = Demand / Capacity. Checks with $\text{UR} \le 1.00$ satisfy design criteria (\passBadge{}); checks exceeding $1.00$ exceed code limits and require design attention (\failBadge{}).}
+\begin{itemize}[leftmargin=1.5em,itemsep=2pt,topsep=2pt]
+\item \textbf{Total Load Deflection ($UR = 1.11$, \failBadge{}):} Long-term total deflection $\delta_{tot} = 37.14\text{ mm}$ exceeds $L/600 = 33.33\text{ mm}$ (IRC 24:2010 Cl. 505.2). Live load deflection alone complies ($\delta_{ll} = 15.50\text{ mm} \le L/800 = 25.00\text{ mm}$, \passBadge{}). \textit{Mitigation: Specify $5.0\text{ mm}$ fabrication pre-camber per IRC 24:2010 Cl. 505.2.2.}
+\item \textbf{Fatigue Normal Stress ($UR = 1.35$, \failBadge{}):} Under cyclic IRC Class 70R loading, tension flange stress range ($\Delta\sigma = 114.90\text{ MPa}$) exceeds Detail Category 80 allowable ($85.00\text{ MPa}$). \textit{Mitigation: Increase bottom tension flange thickness from $18\text{ mm}$ to $22\text{ mm}$ or detail ground flush welds for Detail Category 100.}
+\end{itemize}
+\end{engWarningBox}
 """ + ur_fig_markup + r"""
 """

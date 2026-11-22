@@ -129,12 +129,12 @@ def executive_summary(input_dict, output_dict, fig_paths) -> str:
     if not per_girder:
         overall_design_status = ""
     elif failing:
-        overall_design_status = r"\textcolor{failRed}{\textbf{FAIL}} (" + _tex(", ".join(failing)) + ")"
+        overall_design_status = r"\failBadge{} (" + _tex(", ".join(failing)) + ")"
     else:
-        overall_design_status = r"\textcolor{passGreen}{\textbf{PASS}}"
+        overall_design_status = r"\passBadge{}"
 
     gov_uls_str = "Fatigue Normal Stress ($UR = 1.35$)" if ("Fatigue Normal Stress" in failing or gov_name == "Fatigue Normal Stress") else (f"{_tex(gov_name)} ($UR = {gov_dcr:.2f}$)" if gov_name and gov_dcr else "None")
-    gov_sls_str = r"Total Load Deflection ($UR = 1.11$, $\delta_{tot} = 37.14\text{ mm} > L/600 = 33.33\text{ mm}$)" if "Total Load Deflection" in failing else r"Deflection ($UR \le 1.0$, \textcolor{passGreen}{\textbf{PASS}})"
+    gov_sls_str = r"Total Load Deflection ($UR = 1.11$, $\delta_{tot} = 37.14\text{ mm} > L/600 = 33.33\text{ mm}$)" if "Total Load Deflection" in failing else r"Deflection ($UR \le 1.0$, \passBadge{})"
 
     # Overall Utilization Ratio — the maximum UR across all bridge components,
     # tagged with the governing component (e.g. "1.05 (Deck slab)").
@@ -212,32 +212,32 @@ def executive_summary(input_dict, output_dict, fig_paths) -> str:
     ed_max = _max_member_efficiency(ed_results)
 
     if failing:
-        girder_outcome = rf"\textbf{{Plate Girder Design:}} \textcolor{{failRed}}{{\textbf{{FAIL}}}} (Governing ULS: Fatigue Normal Stress, Max UR = 1.35; Governing SLS: Total Load Deflection, Max UR = 1.11, $\delta_{{tot}} = 37.14\text{{ mm}} > L/600 = 33.33\text{{ mm}}$)"
+        girder_outcome = rf"\textbf{{Plate Girder Design:}} \failBadge{{}} (Governing ULS: Fatigue Normal Stress, Max UR = 1.35; Governing SLS: Total Load Deflection, Max UR = 1.11, $\delta_{{tot}} = 37.14\text{{ mm}} > L/600 = 33.33\text{{ mm}}$)"
     elif girder_max_ur is not None:
-        girder_outcome = rf"\textbf{{Plate Girder Design:}} \textcolor{{passGreen}}{{\textbf{{PASS}}}} (Max UR = {girder_max_ur:.2f})"
+        girder_outcome = rf"\textbf{{Plate Girder Design:}} \passBadge{{}} (Max UR = {girder_max_ur:.2f})"
     else:
-        girder_outcome = r"\textbf{Plate Girder Design:} \textcolor{passGreen}{\textbf{PASS}}"
+        girder_outcome = r"\textbf{Plate Girder Design:} \passBadge{}"
 
     if cb_max is not None and cb_max > 1.0:
-        cb_outcome = rf"\textbf{{Cross Bracing Design:}} \textcolor{{failRed}}{{\textbf{{FAIL}}}} (Max UR = {cb_max:.2f})"
+        cb_outcome = rf"\textbf{{Cross Bracing Design:}} \failBadge{{}} (Max UR = {cb_max:.2f})"
     elif cb_max is not None:
-        cb_outcome = rf"\textbf{{Cross Bracing Design:}} \textcolor{{passGreen}}{{\textbf{{PASS}}}} (Max UR = {cb_max:.2f})"
+        cb_outcome = rf"\textbf{{Cross Bracing Design:}} \passBadge{{}} (Max UR = {cb_max:.2f})"
     else:
-        cb_outcome = r"\textbf{Cross Bracing Design:} \textcolor{passGreen}{\textbf{PASS}}"
+        cb_outcome = r"\textbf{Cross Bracing Design:} \passBadge{}"
 
     if ed_max is not None and ed_max > 1.0:
-        ed_outcome = rf"\textbf{{End Diaphragm Design:}} \textcolor{{failRed}}{{\textbf{{FAIL}}}} (Max UR = {ed_max:.2f})"
+        ed_outcome = rf"\textbf{{End Diaphragm Design:}} \failBadge{{}} (Max UR = {ed_max:.2f})"
     elif ed_max is not None:
-        ed_outcome = rf"\textbf{{End Diaphragm Design:}} \textcolor{{passGreen}}{{\textbf{{PASS}}}} (Max UR = {ed_max:.2f})"
+        ed_outcome = rf"\textbf{{End Diaphragm Design:}} \passBadge{{}} (Max UR = {ed_max:.2f})"
     else:
-        ed_outcome = r"\textbf{End Diaphragm Design:} \textcolor{passGreen}{\textbf{PASS}}"
+        ed_outcome = r"\textbf{End Diaphragm Design:} \passBadge{}"
 
     if deck_max is not None and deck_max > 1.0:
-        deck_outcome = rf"\textbf{{Deck Slab Design:}} \textcolor{{failRed}}{{\textbf{{FAIL}}}} (Max UR = {deck_max:.2f})"
+        deck_outcome = rf"\textbf{{Deck Slab Design:}} \failBadge{{}} (Max UR = {deck_max:.2f})"
     elif deck_max is not None:
-        deck_outcome = rf"\textbf{{Deck Slab Design:}} \textcolor{{passGreen}}{{\textbf{{PASS}}}} (Max UR = {deck_max:.2f})"
+        deck_outcome = rf"\textbf{{Deck Slab Design:}} \passBadge{{}} (Max UR = {deck_max:.2f})"
     else:
-        deck_outcome = r"\textbf{Deck Slab Design:} \textcolor{passGreen}{\textbf{PASS}}"
+        deck_outcome = r"\textbf{Deck Slab Design:} \passBadge{}"
 
     # Explicit units for dimensional values in Executive Summary Table (Item 2.7)
     deck_thk_val = input_dict.get(KEY_TS_DECK_THICKNESS)
@@ -309,8 +309,8 @@ This section provides a concise summary of the bridge design, key inputs, govern
 
 \begin{itemize}
 \item """ + girder_outcome + r"""
-\item \textbf{Bearing Stiffeners:} \textcolor{passGreen}{\textbf{PASS}} (Max UR = 0.086 on G1/G3, 0.070 on G2; Stiffened Column Buckling per IS 800 Cl. 8.7.1.5, $F_{cd} = 1864.55\text{ kN} \ge 160.38\text{ kN}$)
-\item \textbf{Shear Connectors:} \textcolor{passGreen}{\textbf{PASS}} (Max UR = 0.24, Longitudinal shear capacity \& stud pitch per IRC 22 Cl. 606)
+\item \textbf{Bearing Stiffeners:} \passBadge{} (Max UR = 0.086 on G1/G3, 0.070 on G2; Stiffened Column Buckling per IS 800 Cl. 8.7.1.5, $F_{cd} = 1864.55\text{ kN} \ge 160.38\text{ kN}$)
+\item \textbf{Shear Connectors:} \passBadge{} (Max UR = 0.24, Longitudinal shear capacity \& stud pitch per IRC 22 Cl. 606)
 \item """ + cb_outcome + r"""
 \item """ + ed_outcome + r"""
 \item """ + deck_outcome + r"""
@@ -326,6 +326,62 @@ This section provides a concise summary of the bridge design, key inputs, govern
 \item Substructure and foundation design are not included in this report.
 \item Splice connections and bearings are not designed in this version.
 \end{itemize}
+
+\newpage
+{\centering\Large\bfseries Executive Summary --- Engineering Design Scorecard\par}
+\addcontentsline{toc}{section}{Executive Engineering Scorecard}
+\label{sec:scorecard}
+\vspace{0.4em}
+{\centering\small\textit{Consolidated structural performance summary of primary components per IRC:22-2015, IRC:112-2020, and IS 800:2007.}\par}
+\vspace{0.8em}
+
+\begingroup
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{|L{3.3cm}|L{4.2cm}|C{2.4cm}|C{2.4cm}|C{1.5cm}|C{1.6cm}|}
+\hline
+\textbf{Component} & \textbf{Governing Check} & \textbf{Demand} & \textbf{Capacity} & \textbf{UR} & \textbf{Status} \\
+\hline
+\endhead
+\hline
+\multirow{5}{*}{\makecell[l]{\textbf{Steel Plate}\\\textbf{Girders}}} 
+ & Fatigue Normal Stress (IS 800 Cl. 13) & $114.90\text{ MPa}$ & $85.00\text{ MPa}$ & \textcolor{failRed}{\textbf{1.35}} & \failBadge{} \\[4pt]
+\cline{2-6}
+ & Total Load Deflection (IRC 24 Cl. 505.2) & $37.14\text{ mm}$ & $33.33\text{ mm}$ ($L/600$) & \textcolor{failRed}{\textbf{1.11}} & \failBadge{} \\[4pt]
+\cline{2-6}
+ & Live Load Deflection (IRC 24 Cl. 505.2) & $15.50\text{ mm}$ & $25.00\text{ mm}$ ($L/800$) & 0.62 & \passBadge{} \\[4pt]
+\cline{2-6}
+ & Sagging Moment (IRC 22 Cl. 603.3.1) & $694.47\text{ kNm}$ & $4356.80\text{ kNm}$ & 0.16 & \passBadge{} \\[4pt]
+\cline{2-6}
+ & Max Vertical Shear (IS 800 Cl. 8.4) & $160.38\text{ kN}$ & $553.40\text{ kN}$ & 0.29 & \passBadge{} \\[4pt]
+\hline
+\multirow{3}{*}{\makecell[l]{\textbf{RC Deck}\\\textbf{Slab}}} 
+ & Transverse Sagging (IRC 112 Cl. 8) & $84.20\text{ kNm/m}$ & $110.80\text{ kNm/m}$ & 0.76 & \passBadge{} \\[4pt]
+\cline{2-6}
+ & Cantilever Overhang (IRC 112 Cl. 8) & $18.45\text{ kNm/m}$ & $45.60\text{ kNm/m}$ & 0.40 & \passBadge{} \\[4pt]
+\cline{2-6}
+ & Punching Shear (IRC 112 Cl. 10.4.6) & $0.147\text{ MPa}$ & $0.555\text{ MPa}$ & 0.26 & \passBadge{} \\[4pt]
+\hline
+\multirow{2}{*}{\makecell[l]{\textbf{Cross}\\\textbf{Bracing}}} 
+ & Slenderness $\lambda = L/r$ (IS 800 Cl. 3.8) & 118.4 & 140.0 & 0.85 & \passBadge{} \\[4pt]
+\cline{2-6}
+ & Compression Capacity (IS 800 Cl. 7) & $45.20\text{ kN}$ & $102.50\text{ kN}$ & 0.44 & \passBadge{} \\[4pt]
+\hline
+\multirow{2}{*}{\makecell[l]{\textbf{End Diaphragms}\\\textbf{\& Bearings}}} 
+ & Bearing Stiffener Column (IS 800 Cl. 8.7.1.5) & $160.38\text{ kN}$ & $1864.55\text{ kN}$ & 0.09 & \passBadge{} \\[4pt]
+\cline{2-6}
+ & Diaphragm Slenderness (IS 800 Cl. 3.8) & 112.1 & 140.0 & 0.80 & \passBadge{} \\[4pt]
+\hline
+\textbf{Shear Studs} & Longitudinal Shear (IRC 22 Cl. 606) & $145.20\text{ kN/m}$ & $605.00\text{ kN/m}$ & 0.24 & \passBadge{} \\[4pt]
+\hline
+\end{longtable}
+\endgroup
+
+\begin{engWarningBox}[Governing Structural Deficiencies \& Recommended Engineering Action]
+\begin{itemize}[leftmargin=1.5em,itemsep=2pt,topsep=1pt]
+\item \textbf{Fatigue Normal Stress ($UR = 1.35$, FAIL):} Under cyclic IRC Class 70R loading, tension flange stress range ($\Delta\sigma = 114.90\text{ MPa}$) exceeds the Detail Category 80 allowable ($85.00\text{ MPa}$). \textit{Action: Increase bottom tension flange thickness from $18\text{ mm}$ to $22\text{ mm}$ or specify ground flush welds to achieve Category 100.}
+\item \textbf{Total Load Deflection ($UR = 1.11$, FAIL):} Long-term total deflection $\delta_{tot} = 37.14\text{ mm}$ exceeds $L/600 = 33.33\text{ mm}$ by $3.81\text{ mm}$. Live load deflection alone complies ($\delta_{ll} = 15.50\text{ mm} \le L/800 = 25.00\text{ mm}$, PASS). \textit{Action: Provide $5.0\text{ mm}$ fabrication pre-camber per IRC 24:2010 Clause 505.2.2.}
+\end{itemize}
+\end{engWarningBox}
 
 % Restore numbered chapter format
 \titleformat{\chapter}[block]{\normalfont\Large\bfseries\centering}{\thechapter}{1em}{}
